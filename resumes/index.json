@@ -95,28 +95,5 @@
       "Web Developer"
     ],
     "priority_score": 7
-  },
-  {
-    "filename": "general_game_programmer.pdf",
-    "title": "General Game & Systems Programmer Resume",
-    "domain": "Game Development",
-    "primary_engine": "Unity",
-    "focus_areas": [
-      "unity",
-      "c#",
-      "c++",
-      "game development",
-      "algorithms",
-      "graphics",
-      "physics",
-      "systems"
-    ],
-    "target_roles": [
-      "Associate Game Programmer",
-      "Junior Game Developer",
-      "Game Developer",
-      "Software Engineer - Games"
-    ],
-    "priority_score": 5
   }
 ]

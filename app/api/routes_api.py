@@ -305,6 +305,7 @@ async def get_ai_settings():
         "provider_type": cfg.provider_type.value,
         "model": cfg.model,
         "base_url": cfg.base_url or "",
+        "api_key": cfg.api_key or "",
         "temperature": cfg.temperature,
         "has_api_key": bool(cfg.api_key),
         "is_available": ai_client.is_available
@@ -322,7 +323,7 @@ async def update_ai_settings(req: AIConfigUpdateRequest):
             temperature=req.temperature
         )
         ai_client.set_config(new_config)
-        return {"success": True, "message": "AI settings updated successfully!"}
+        return {"success": True, "message": "AI settings saved and persisted successfully!"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -345,6 +346,7 @@ async def get_email_settings():
     from app.services.email_service import email_service
     return {
         "email_address": email_service.config.email_address or "",
+        "app_password": email_service.config.app_password or "",
         "has_password": bool(email_service.config.app_password),
         "display_name": email_service.config.display_name or "",
         "smtp_host": email_service.config.smtp_host,

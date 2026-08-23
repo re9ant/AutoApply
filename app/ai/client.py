@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from app.ai.providers import BaseLLMProvider, LLMProviderType, ProviderConfig, ProviderFactory
 from app.config.settings import settings
+from app.config.config_store import config_store
 
 logger = logging.getLogger(__name__)
 
@@ -11,16 +12,31 @@ T = TypeVar("T", bound=BaseModel)
 
 
 class AIClient:
-    """Wrapper around Multi-LLM Provider Engine."""
+    """Wrapper around Multi-LLM Provider Engine with persistent configuration support."""
 
     def __init__(self):
-        # Initialize default config from settings
-        default_provider = LLMProviderType.OPENAI if settings.OPENAI_API_KEY else LLMProviderType.MOCK
+        saved = config_store.get_ai_config()
+
+        provider_val = saved.get("provider_type", "openai")
+        try:
+            provider_enum = LLMProviderType(provider_val)
+        except ValueError:
+            provider_enum = LLMProviderType.OPENAI
+
+        api_key = saved.get("api_key") or settings.OPENAI_API_KEY
+        model = saved.get("model") or settings.OPENAI_MODEL
+        base_url = saved.get("base_url") or None
+        temperature = saved.get("temperature", settings.OPENAI_TEMPERATURE)
+
+        if not api_key and provider_enum not in [LLMProviderType.MOCK, LLMProviderType.OLLAMA]:
+            provider_enum = LLMProviderType.MOCK
+
         self.config = ProviderConfig(
-            provider_type=default_provider,
-            api_key=settings.OPENAI_API_KEY,
-            model=settings.OPENAI_MODEL,
-            temperature=settings.OPENAI_TEMPERATURE
+            provider_type=provider_enum,
+            api_key=api_key,
+            model=model,
+            base_url=base_url,
+            temperature=temperature
         )
         ProviderFactory.set_active_config(self.config)
 
@@ -33,6 +49,13 @@ class AIClient:
     def set_config(self, new_config: ProviderConfig) -> None:
         self.config = new_config
         ProviderFactory.set_active_config(new_config)
+        config_store.set_ai_config({
+            "provider_type": new_config.provider_type.value,
+            "api_key": new_config.api_key or "",
+            "model": new_config.model,
+            "base_url": new_config.base_url or "",
+            "temperature": new_config.temperature
+        })
 
     def get_provider(self) -> BaseLLMProvider:
         return ProviderFactory.get_provider(self.config)

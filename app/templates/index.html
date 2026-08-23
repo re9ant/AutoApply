@@ -1303,7 +1303,12 @@ Qualifications:
         async loadAiSettings() {
           try {
             const res = await fetch('/api/settings/ai');
-            this.aiSettings = await res.json();
+            const data = await res.json();
+            this.aiSettings.provider_type = data.provider_type || 'openai';
+            this.aiSettings.model = data.model || 'gpt-4o-mini';
+            this.aiSettings.base_url = data.base_url || '';
+            this.aiSettings.api_key = data.api_key || '';
+            this.aiSettings.is_available = data.is_available || false;
           } catch (e) {
             console.error('Error loading AI settings:', e);
           }
@@ -1317,7 +1322,7 @@ Qualifications:
               body: JSON.stringify(this.aiSettings)
             });
             if (!res.ok) throw new Error(await res.text());
-            this.showToast('AI Settings updated!');
+            this.showToast('AI Settings saved successfully!');
             await this.loadAiSettings();
           } catch (e) {
             this.showToast('Error saving settings: ' + e.message, 'error');
@@ -1342,6 +1347,7 @@ Qualifications:
             const res = await fetch('/api/settings/email');
             const data = await res.json();
             this.emailSettings.email_address = data.email_address || '';
+            this.emailSettings.app_password = data.app_password || '';
             this.emailSettings.display_name = data.display_name || '';
             this.emailSettings.has_password = data.has_password || false;
           } catch (e) {

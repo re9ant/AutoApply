@@ -79,9 +79,40 @@ def test_view_resume_file():
     assert "inline" in response.headers["content-disposition"]
 
 
-def test_get_ai_settings_api():
-    response = client.get("/api/settings/ai")
-    assert response.status_code == 200
-    data = response.json()
-    assert "provider_type" in data
-    assert "model" in data
+def test_get_and_update_ai_settings_persistence():
+    payload = {
+        "provider_type": "openai",
+        "model": "gpt-4o",
+        "api_key": "sk-test-secret-key-12345",
+        "base_url": "https://api.openai.com/v1",
+        "temperature": 0.2
+    }
+    post_resp = client.post("/api/settings/ai", json=payload)
+    assert post_resp.status_code == 200
+    assert post_resp.json()["success"] is True
+
+    get_resp = client.get("/api/settings/ai")
+    assert get_resp.status_code == 200
+    data = get_resp.json()
+    assert data["provider_type"] == "openai"
+    assert data["model"] == "gpt-4o"
+    assert data["api_key"] == "sk-test-secret-key-12345"
+
+
+def test_get_and_update_email_settings_persistence():
+    payload = {
+        "email_address": "applicant.gameplay@gmail.com",
+        "app_password": "abcd efgh ijkl mnop",
+        "display_name": "Game Dev Applicant"
+    }
+    post_resp = client.post("/api/settings/email", json=payload)
+    assert post_resp.status_code == 200
+    assert post_resp.json()["success"] is True
+
+    get_resp = client.get("/api/settings/email")
+    assert get_resp.status_code == 200
+    data = get_resp.json()
+    assert data["email_address"] == "applicant.gameplay@gmail.com"
+    assert data["app_password"] == "abcd efgh ijkl mnop"
+    assert data["display_name"] == "Game Dev Applicant"
+    assert data["has_password"] is True

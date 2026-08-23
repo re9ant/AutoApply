@@ -40,13 +40,31 @@ class EmailService:
     """Handles HR email discovery, tailored cover email generation, PDF attachment, and Gmail SMTP delivery."""
 
     def __init__(self, config: Optional[EmailAccountConfig] = None):
-        self.config = config or EmailAccountConfig(
-            email_address=os.getenv("GMAIL_ADDRESS"),
-            app_password=os.getenv("GMAIL_APP_PASSWORD")
-        )
+        if config:
+            self.config = config
+        else:
+            from app.config.config_store import config_store
+            saved = config_store.get_email_config()
+            self.config = EmailAccountConfig(
+                email_address=saved.get("email_address") or os.getenv("GMAIL_ADDRESS"),
+                app_password=saved.get("app_password") or os.getenv("GMAIL_APP_PASSWORD"),
+                display_name=saved.get("display_name") or "",
+                smtp_host=saved.get("smtp_host", "smtp.gmail.com"),
+                smtp_port=saved.get("smtp_port", 587),
+                use_tls=saved.get("use_tls", True)
+            )
 
     def set_config(self, config: EmailAccountConfig) -> None:
         self.config = config
+        from app.config.config_store import config_store
+        config_store.set_email_config({
+            "email_address": config.email_address or "",
+            "app_password": config.app_password or "",
+            "display_name": config.display_name or "",
+            "smtp_host": config.smtp_host,
+            "smtp_port": config.smtp_port,
+            "use_tls": config.use_tls
+        })
 
     def extract_hr_email(self, jd_text: str, company: str, job_url: Optional[str] = None) -> str:
         """Find recruiter/HR email in JD text or construct a standard fallback."""
