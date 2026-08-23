@@ -1,0 +1,190 @@
+{
+  "candidate": {
+    "name": "Alex Mercer",
+    "email": "alex.mercer.dev@example.com",
+    "phone": "+1 (555) 019-2834",
+    "location": "San Francisco, CA, USA",
+    "portfolio": "https://alexmercer-portfolio.example.com",
+    "github": "https://github.com/alexmercer-dev",
+    "linkedin": "https://linkedin.com/in/alexmercer-dev",
+    "itch_io": "https://alexmercer.itch.io",
+    "artstation": "https://artstation.com/alexmercer"
+  },
+  "work_authorization": {
+    "citizenship": ["United States"],
+    "authorized_countries": ["United States"],
+    "requires_sponsorship": false,
+    "willing_to_relocate": true
+  },
+  "education": [
+    {
+      "institution": "University of California, Berkeley",
+      "degree": "B.S.",
+      "field_of_study": "Computer Science & Engineering",
+      "start_year": 2020,
+      "graduation_year": 2024,
+      "gpa": "3.85 / 4.0",
+      "relevant_coursework": [
+        "Data Structures & Algorithms",
+        "Computer Graphics & Shaders",
+        "Operating Systems & Systems Programming",
+        "Database Systems & Distributed Architectures",
+        "Game Engine Architecture & AI",
+        "Full-Stack Web Engineering"
+      ]
+    }
+  ],
+  "skills": {
+    "domains": [
+      "Game Development",
+      "Backend Engineering",
+      "Full-Stack Development",
+      "Systems Programming"
+    ],
+    "languages": [
+      "C#",
+      "C++",
+      "Python",
+      "TypeScript",
+      "JavaScript",
+      "SQL",
+      "HLSL / ShaderLab",
+      "HTML5 / CSS3"
+    ],
+    "engines": [
+      "Unity (2021/2022/6)",
+      "Unreal Engine 5 (Basic)"
+    ],
+    "frameworks": [
+      "FastAPI",
+      "React",
+      "Next.js",
+      "Node.js",
+      "Django",
+      "Unity DOTS / Entities",
+      "Netcode for GameObjects",
+      "Tailwind CSS",
+      "SQLAlchemy",
+      "Pydantic"
+    ],
+    "tools": [
+      "Git & GitHub",
+      "Docker",
+      "PostgreSQL",
+      "Redis",
+      "Linux / Bash",
+      "Visual Studio",
+      "JetBrains Rider",
+      "Blender (Basic)",
+      "RenderDoc",
+      "Postman"
+    ],
+    "game_systems": [
+      "Gameplay Mechanics & Character Controllers",
+      "AI & Behavior Trees / Utility AI",
+      "State Machines (Hierarchical FSM)",
+      "NavMesh & Custom A* Pathfinding",
+      "Inventory & Quest Systems",
+      "UI Toolkit & uGUI",
+      "Custom Unity Editor Tools & Inspectors",
+      "Physics & Collision Systems",
+      "ScriptableObject Architectures",
+      "Object Pooling & Optimization"
+    ]
+  },
+  "experience": [
+    {
+      "company": "PixelForge Interactive",
+      "role": "Software & Gameplay Programmer",
+      "location": "San Francisco, CA",
+      "employment_type": "Full-time",
+      "start_date": "2024-06",
+      "end_date": "Present",
+      "is_current": true,
+      "description": "Engineered core gameplay systems and backend telemetry microservices for a 3D action title.",
+      "achievements": [
+        "Architected responsive 3rd-person character controller and combat state machine in Unity C#.",
+        "Engineered low-latency Python FastAPI telemetry service capturing player telemetry and crash metrics into PostgreSQL.",
+        "Built modular custom Unity Editor tools reducing designer iteration times by 40%."
+      ],
+      "technologies": ["Unity", "C#", "Python", "FastAPI", "PostgreSQL", "Docker", "Git"]
+    },
+    {
+      "company": "Apex Cloud Systems",
+      "role": "Software Engineering Intern",
+      "location": "San Francisco, CA",
+      "employment_type": "Internship",
+      "start_date": "2023-05",
+      "end_date": "2023-08",
+      "is_current": false,
+      "description": "Developed RESTful APIs and modern React dashboards for internal monitoring.",
+      "achievements": [
+        "Built full-stack analytics dashboard using React, TypeScript, and FastAPI with Redis caching.",
+        "Created automated Docker CI/CD test workflows on GitHub Actions reducing deployment failures by 25%."
+      ],
+      "technologies": ["TypeScript", "React", "Python", "FastAPI", "Redis", "Docker"]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Chronicles of Aetheria",
+      "domain": "Game Development",
+      "role": "Lead Gameplay & AI Developer",
+      "engine": "Unity",
+      "description": "3D Action RPG featuring fluid melee combat, enemy AI behavior trees, and procedural generation.",
+      "technical_highlights": [
+        "Custom combat state machine with combo chains, parry windows, and hit-stop visual effects.",
+        "Boss enemy AI with multi-phase behavior trees and telegraphed attacks.",
+        "Custom HLSL shaders for dissolution and rim lighting in Universal Render Pipeline."
+      ],
+      "technologies": ["Unity", "C#", "HLSL", "URP", "NavMesh"],
+      "repo_url": "https://github.com/alexmercer-dev/chronicles-of-aetheria",
+      "demo_url": "https://alexmercer.itch.io/chronicles-of-aetheria"
+    },
+    {
+      "name": "CloudTelemetry & Metrics Hub",
+      "domain": "Backend Engineering",
+      "role": "Solo Creator",
+      "engine": "FastAPI / Docker",
+      "description": "High-throughput telemetry ingestion pipeline for multiplayer games and microservices.",
+      "technical_highlights": [
+        "Asynchronous event ingestion handling 1,500+ requests/sec using FastAPI and aiosqlite/PostgreSQL.",
+        "Real-time event streaming and dashboarding with WebSockets and React frontend."
+      ],
+      "technologies": ["Python", "FastAPI", "PostgreSQL", "Redis", "Docker", "TypeScript"],
+      "repo_url": "https://github.com/alexmercer-dev/cloud-telemetry-hub"
+    }
+  ],
+  "achievements": [
+    {
+      "title": "1st Place Winner - Global Game Jam 2024",
+      "issuer": "Global Game Jam",
+      "date": "2024-01",
+      "description": "Led team of 4 to program a physics puzzle game in Unity within 48 hours."
+    },
+    {
+      "title": "AWS Certified Cloud Practitioner",
+      "issuer": "Amazon Web Services",
+      "date": "2023-10",
+      "description": "Foundational certification in AWS cloud architectures, compute, and security."
+    }
+  ],
+  "preferences": {
+    "roles": [
+      "Gameplay Programmer",
+      "Unity Developer",
+      "Backend Engineer",
+      "Software Engineer",
+      "Full Stack Developer",
+      "Junior Game Developer",
+      "Python Developer"
+    ],
+    "locations": ["San Francisco, CA", "Remote", "Seattle, WA", "Austin, TX", "New York, NY"],
+    "remote_only": false,
+    "allow_hybrid": true,
+    "allow_onsite": true,
+    "minimum_match_score": 75,
+    "salary_currency": "USD",
+    "minimum_salary": 75000
+  }
+}

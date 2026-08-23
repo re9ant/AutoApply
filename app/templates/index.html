@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autonomous Job Application Agent - AI & Tech Dashboard</title>
+  <!-- Tailwind CSS & Inter Font -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.0/dist/cdn.min.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    [x-cloak] { display: none !important; }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col font-sans antialiased" x-data="jobAgentApp()" x-init="initApp()">
+
+  <!-- Top Navbar -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <i class="fa-solid fa-gamepad text-white text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+            Autonomous Job Agent
+          </h1>
+          <p class="text-xs text-slate-400">Multi-Tech & Game Dev Discovery Engine</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center space-x-1 bg-slate-950/80 p-1.5 rounded-xl border border-slate-800">
+        <button @click="activeTab = 'discovery'; loadPresets()" :class="activeTab === 'discovery' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center space-x-2">
+          <i class="fa-solid fa-compass"></i>
+          <span>Job Scraper</span>
+        </button>
+        <button @click="activeTab = 'analyzer'" :class="activeTab === 'analyzer' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center space-x-2">
+          <i class="fa-solid fa-bullseye"></i>
+          <span>JD Analyzer</span>
+        </button>
+        <button @click="activeTab = 'profile'; loadProfile()" :class="activeTab === 'profile' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center space-x-2">
+          <i class="fa-solid fa-user"></i>
+          <span>Profile</span>
+        </button>
+        <button @click="activeTab = 'resumes'; loadResumes()" :class="activeTab === 'resumes' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center space-x-2">
+          <i class="fa-solid fa-file-pdf"></i>
+          <span>Resumes</span>
+        </button>
+        <button @click="activeTab = 'tracker'; loadApplications()" :class="activeTab === 'tracker' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center space-x-2">
+          <i class="fa-solid fa-table"></i>
+          <span>Excel Tracker</span>
+        </button>
+        <button @click="activeTab = 'settings'; loadAiSettings(); loadEmailSettings()" :class="activeTab === 'settings' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center space-x-2">
+          <i class="fa-solid fa-gear"></i>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <!-- Active Status Badge -->
+      <div class="flex items-center space-x-3 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+        <div class="flex items-center space-x-1.5">
+          <span class="w-2 h-2 rounded-full" :class="aiSettings.is_available ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'"></span>
+          <span class="text-xs font-mono text-slate-300" x-text="aiSettings.provider_type"></span>
+        </div>
+        <span class="text-slate-600">|</span>
+        <div class="flex items-center space-x-1.5 text-xs text-slate-300">
+          <i class="fa-solid fa-envelope text-[11px]" :class="emailSettings.has_password ? 'text-emerald-400' : 'text-slate-500'"></i>
+          <span x-text="emailSettings.email_address ? emailSettings.email_address.split('@')[0] : 'No Email'"></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- Toast Notification -->
+    <div x-cloak x-show="toast.show" x-transition class="fixed bottom-5 right-5 z-50 flex items-center space-x-3 px-4 py-3 rounded-xl shadow-2xl border" :class="toast.type === 'success' ? 'bg-emerald-950/90 border-emerald-500 text-emerald-200' : 'bg-rose-950/90 border-rose-500 text-rose-200'">
+      <i :class="toast.type === 'success' ? 'fa-solid fa-circle-check text-emerald-400' : 'fa-solid fa-circle-exclamation text-rose-400'"></i>
+      <span class="text-sm font-medium" x-text="toast.message"></span>
+    </div>
+
+    <!-- Batch Application Results Modal -->
+    <div x-cloak x-show="showBatchApplyModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div @click.away="showBatchApplyModal = false" class="glass-card bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-3xl w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+            <i class="fa-solid fa-paper-plane text-emerald-400"></i>
+            <span>Application Results & Email Audit Log</span>
+          </h3>
+          <button @click="showBatchApplyModal = false" class="text-slate-400 hover:text-slate-200">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <template x-for="r in batchApplyResults" :key="r.application_id">
+            <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 space-y-2">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="font-bold text-white text-sm" x-text="r.company + ' — ' + r.job_title"></div>
+                  <div class="text-xs font-mono text-indigo-300" x-text="'Channel: ' + r.method"></div>
+                </div>
+                <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase" :class="r.is_dry_run ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'" x-text="r.is_dry_run ? 'DRY RUN (Preview)' : 'SUBMITTED'"></span>
+              </div>
+
+              <div class="text-xs text-slate-400" x-text="r.details"></div>
+
+              <!-- Email Preview Block -->
+              <div x-show="r.email_preview" class="bg-slate-900/90 rounded-lg p-3 border border-slate-800 space-y-1.5 text-xs font-mono text-slate-300">
+                <div class="text-indigo-400 font-semibold" x-text="'To: ' + r.email_preview?.to"></div>
+                <div class="text-slate-300 font-semibold" x-text="'Subject: ' + r.email_preview?.subject"></div>
+                <div class="text-emerald-400 text-[11px]" x-text="'Attached: ' + r.email_preview?.attachment + ' (Status: ' + (r.email_preview?.attachment_found ? 'Found & Attached' : 'File missing') + ')'"></div>
+                <div class="text-slate-400 text-[11px] whitespace-pre-wrap max-h-36 overflow-y-auto border-t border-slate-800/80 pt-1.5" x-text="r.email_preview?.body"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-slate-800 text-xs">
+          <span class="text-slate-400 flex items-center space-x-1">
+            <i class="fa-solid fa-file-excel text-emerald-400 mr-1"></i>
+            <span>Updated in <b>data/tracker.xlsx</b> with submission details</span>
+          </span>
+          <button @click="showBatchApplyModal = false" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 0: JOB SCRAPER & DISCOVERY ENGINE -->
+    <!-- ================================================================= -->
+    <section x-show="activeTab === 'discovery'" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left: Scraper Controls -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="glass-card rounded-2xl p-6 shadow-xl space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h2 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-spider text-indigo-400"></i>
+                <span>Job Scraping Targets</span>
+              </h2>
+              <span class="text-xs font-mono text-slate-400">ATS & Feeds</span>
+            </div>
+
+            <!-- Studio / Tech Presets -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Select Target Sites & ATS Boards</label>
+              <div class="grid grid-cols-2 gap-2">
+                <template x-for="p in presets" :key="p.target">
+                  <label class="flex items-center space-x-2 p-2 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-900 cursor-pointer text-xs">
+                    <input type="checkbox" :value="p.target" x-model="discoveryForm.selected_presets" class="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500">
+                    <div>
+                      <div class="font-semibold text-slate-200" x-text="p.name"></div>
+                      <div class="text-[10px] text-slate-500 font-mono" x-text="p.type"></div>
+                    </div>
+                  </label>
+                </template>
+              </div>
+            </div>
+
+            <!-- Custom Target Input -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Add Custom Career URL or ATS Handle</label>
+              <div class="flex space-x-2">
+                <select x-model="newCustomTarget.type" class="bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-2 text-xs text-slate-200">
+                  <option value="greenhouse">Greenhouse</option>
+                  <option value="lever">Lever</option>
+                  <option value="ashby">Ashby</option>
+                  <option value="web">Web Page</option>
+                </select>
+                <input type="text" x-model="newCustomTarget.target" placeholder="e.g. companyhandle or https://career.url" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+                <button @click="addCustomTarget()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold">
+                  + Add
+                </button>
+              </div>
+
+              <!-- Custom targets list -->
+              <div class="mt-2 space-y-1" x-show="discoveryForm.custom_targets.length > 0">
+                <template x-for="(ct, idx) in discoveryForm.custom_targets" :key="idx">
+                  <div class="flex items-center justify-between bg-slate-900 px-3 py-1.5 rounded-lg text-xs">
+                    <span class="font-mono text-indigo-300" x-text="ct.type + ': ' + ct.target"></span>
+                    <button @click="discoveryForm.custom_targets.splice(idx, 1)" class="text-rose-400 hover:text-rose-300">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Keywords & Filters -->
+            <div class="space-y-3 pt-1">
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Role & Tech Keywords (Comma-separated)</label>
+                <input type="text" :value="discoveryForm.keywords.join(', ')" @input="discoveryForm.keywords = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+              </div>
+
+              <div class="flex items-center justify-between">
+                <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+                  <input type="checkbox" x-model="discoveryForm.remote_only" class="rounded border-slate-700 bg-slate-900 text-indigo-600">
+                  <span>Remote roles only</span>
+                </label>
+                <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+                  <input type="checkbox" x-model="discoveryForm.auto_score_and_sync" class="rounded border-slate-700 bg-slate-900 text-indigo-600">
+                  <span>Auto-score & sync to Excel</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Run Button -->
+            <button @click="runDiscovery()" :disabled="scraping" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:opacity-90 disabled:opacity-50 text-white font-bold text-xs shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center space-x-2">
+              <i x-show="scraping" class="fa-solid fa-spinner fa-spin"></i>
+              <i x-show="!scraping" class="fa-solid fa-magnifying-glass-location"></i>
+              <span x-text="scraping ? 'Discovering & Scraping Roles...' : 'Start Job Discovery & Scrape'"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Discovered Results Stream with Batch Selection -->
+        <div class="lg:col-span-7 space-y-4">
+          <!-- Discovery Stats Bar -->
+          <div x-show="discoveryResponse" class="grid grid-cols-3 gap-3">
+            <div class="glass-card rounded-xl p-3 text-center">
+              <div class="text-lg font-bold text-indigo-400" x-text="discoveryResponse?.total_discovered || 0"></div>
+              <div class="text-[10px] uppercase font-semibold text-slate-400">Total Scraped</div>
+            </div>
+            <div class="glass-card rounded-xl p-3 text-center">
+              <div class="text-lg font-bold text-emerald-400" x-text="discoveryResponse?.new_jobs_processed || 0"></div>
+              <div class="text-[10px] uppercase font-semibold text-slate-400">New Matched & Synced</div>
+            </div>
+            <div class="glass-card rounded-xl p-3 text-center">
+              <div class="text-lg font-bold text-amber-400" x-text="discoveryResponse?.duplicates_skipped || 0"></div>
+              <div class="text-[10px] uppercase font-semibold text-slate-400">Duplicates Skipped</div>
+            </div>
+          </div>
+
+          <!-- Batch Action Bar -->
+          <div x-cloak x-show="discoveryResponse && discoveryResponse.results && discoveryResponse.results.length > 0" class="glass-card rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3 bg-indigo-950/30 border border-indigo-500/30">
+            <div class="flex items-center space-x-2">
+              <button @click="selectAllDiscovered(true)" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg">
+                Select All
+              </button>
+              <button @click="selectAllDiscovered(false)" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg">
+                Select None
+              </button>
+              <span class="text-xs text-indigo-300 font-semibold px-2 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/30" x-text="getSelectedDiscoveredCount() + ' selected'"></span>
+            </div>
+
+            <div class="flex items-center space-x-3">
+              <label class="flex items-center space-x-1.5 text-xs text-slate-300 cursor-pointer">
+                <input type="checkbox" x-model="applyPreferences.prefer_email" class="rounded border-slate-700 bg-slate-900 text-indigo-600">
+                <span>Prefer Email to HR</span>
+              </label>
+              <label class="flex items-center space-x-1.5 text-xs text-slate-300 cursor-pointer">
+                <input type="checkbox" x-model="applyPreferences.is_dry_run" class="rounded border-slate-700 bg-slate-900 text-indigo-600">
+                <span>Dry Run Mode</span>
+              </label>
+              <button @click="applySelectedDiscovered()" :disabled="applying || getSelectedDiscoveredCount() === 0" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 disabled:opacity-50 text-white font-bold text-xs shadow-md flex items-center space-x-1.5">
+                <i x-show="applying" class="fa-solid fa-spinner fa-spin"></i>
+                <i x-show="!applying" class="fa-solid fa-paper-plane"></i>
+                <span>Apply to Selected</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div x-show="!discoveryResponse && !scraping" class="glass-card rounded-2xl p-12 text-center flex flex-col items-center justify-center h-full min-h-[400px]">
+            <div class="w-16 h-16 rounded-2xl bg-slate-800/80 flex items-center justify-center text-slate-500 text-2xl mb-4">
+              <i class="fa-solid fa-satellite-dish"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-300">Discovery Engine Ready</h3>
+            <p class="text-xs text-slate-500 max-w-sm mt-1">Select studios or ATS sources on the left and click "Start Job Discovery" to scrape open roles, calculate match scores, and sync to Excel.</p>
+          </div>
+
+          <!-- Discovered Cards List -->
+          <div x-cloak x-show="discoveryResponse && discoveryResponse.results" class="space-y-3">
+            <template x-for="(res, idx) in discoveryResponse?.results" :key="idx">
+              <div class="glass-card rounded-xl p-4.5 space-y-2.5 transition-all hover:border-slate-700" :class="res.selected ? 'border-indigo-500/60 bg-slate-900/90' : ''">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-start space-x-3">
+                    <input type="checkbox" x-model="res.selected" class="mt-1 rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                    <div>
+                      <div class="flex items-center space-x-2">
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold" x-text="res.discovered_job.source"></span>
+                        <span class="text-xs font-semibold text-indigo-400" x-text="res.discovered_job.company"></span>
+                      </div>
+                      <h3 class="text-sm font-bold text-white mt-1" x-text="res.discovered_job.title"></h3>
+                      <p class="text-xs text-slate-400 font-mono" x-text="'Location: ' + res.discovered_job.location"></p>
+                    </div>
+                  </div>
+
+                  <!-- Score Badge -->
+                  <div class="text-right flex flex-col items-end space-y-1">
+                    <template x-if="res.match_score !== null && res.match_score !== undefined">
+                      <span class="px-2.5 py-0.5 rounded-full text-xs font-bold" :class="res.match_score >= 75 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : (res.match_score >= 60 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30')" x-text="res.match_score + '% Match'"></span>
+                    </template>
+                    <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded" :class="res.decision_status === 'READY' ? 'bg-emerald-950 text-emerald-300' : (res.decision_status === 'ALREADY_TRACKED' ? 'bg-slate-800 text-slate-400' : 'bg-indigo-950 text-indigo-300')" x-text="res.decision_status"></span>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-1 border-t border-slate-800/60 text-xs">
+                  <div class="flex items-center space-x-1.5" x-show="res.recommended_resume">
+                    <span class="text-slate-500 text-[11px]">Resume:</span>
+                    <a :href="'/api/resumes/view/' + encodeURIComponent(res.recommended_resume)" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-[11px] font-mono underline font-medium flex items-center space-x-1">
+                      <span x-text="res.recommended_resume"></span>
+                      <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                    </a>
+                  </div>
+                  <a :href="res.discovered_job.url" target="_blank" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center space-x-1 ml-auto">
+                    <span>View Application Link</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                  </a>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 1: JD ANALYZER & MATCHER -->
+    <!-- ================================================================= -->
+    <section x-cloak x-show="activeTab === 'analyzer'" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left: Input Form -->
+        <div class="lg:col-span-6 space-y-4">
+          <div class="glass-card rounded-2xl p-6 shadow-xl space-y-4">
+            <div class="flex items-center justify-between">
+              <h2 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-file-lines text-indigo-400"></i>
+                <span>Job Description Input</span>
+              </h2>
+              <button @click="loadSampleJD()" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium underline">
+                Load Sample Unity JD
+              </button>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Application URL / Link</label>
+              <input type="text" x-model="analyzerForm.application_url" placeholder="https://company.com/careers/job-123" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Source / Platform</label>
+              <select x-model="analyzerForm.source" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                <option value="Direct Company Careers">Direct Company Careers</option>
+                <option value="Greenhouse">Greenhouse</option>
+                <option value="Lever">Lever</option>
+                <option value="Ashby">Ashby</option>
+                <option value="Hitmarker">Hitmarker</option>
+                <option value="LinkedIn">LinkedIn</option>
+                <option value="GameJobs.co">GameJobs.co</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Paste Raw Job Description Text *</label>
+              <textarea rows="11" x-model="analyzerForm.raw_jd_text" placeholder="Paste full job description, qualifications, and requirements here..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500"></textarea>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+              <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+                <input type="checkbox" x-model="analyzerForm.sync_to_excel" class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500">
+                <span>Automatically sync to Excel Application Tracker</span>
+              </label>
+
+              <button @click="runAnalysis()" :disabled="analyzing || !analyzerForm.raw_jd_text" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white font-semibold text-xs shadow-lg shadow-indigo-500/25 transition-all flex items-center space-x-2">
+                <i x-show="analyzing" class="fa-solid fa-spinner fa-spin"></i>
+                <i x-show="!analyzing" class="fa-solid fa-wand-magic-sparkles"></i>
+                <span x-text="analyzing ? 'Analyzing with AI...' : 'Analyze & Match Job'"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Results & Score Report -->
+        <div class="lg:col-span-6 space-y-4">
+          <!-- Empty State -->
+          <div x-show="!analysisResult && !analyzing" class="glass-card rounded-2xl p-12 text-center flex flex-col items-center justify-center h-full min-h-[400px]">
+            <div class="w-16 h-16 rounded-2xl bg-slate-800/80 flex items-center justify-center text-slate-500 text-2xl mb-4">
+              <i class="fa-solid fa-magnifying-glass-chart"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-300">Ready to Analyze</h3>
+            <p class="text-xs text-slate-500 max-w-sm mt-1">Paste a job posting on the left to extract technical requirements, compute hybrid match score, and recommend resume.</p>
+          </div>
+
+          <!-- Active Analysis Card -->
+          <div x-cloak x-show="analysisResult" class="glass-card rounded-2xl p-6 shadow-xl space-y-5">
+            <!-- Header Result -->
+            <div class="flex items-start justify-between border-b border-slate-800 pb-4">
+              <div>
+                <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300" x-text="analysisResult?.application_id"></span>
+                <h3 class="text-lg font-bold text-white mt-1" x-text="analysisResult?.extracted_jd?.title"></h3>
+                <p class="text-xs text-indigo-300 font-medium" x-text="analysisResult?.extracted_jd?.company + ' • ' + (analysisResult?.extracted_jd?.location || 'Remote')"></p>
+              </div>
+
+              <!-- Score Badge -->
+              <div class="text-right">
+                <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold shadow-lg" :class="analysisResult?.score_breakdown?.total_score >= 75 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : (analysisResult?.score_breakdown?.total_score >= 60 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' : 'bg-rose-500/20 text-rose-400 border border-rose-500/40')">
+                  <span x-text="analysisResult?.score_breakdown?.total_score + '% Match'"></span>
+                </div>
+                <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mt-1" x-text="'Status: ' + analysisResult?.status"></div>
+              </div>
+            </div>
+
+            <!-- Recommended Resume Callout -->
+            <div class="bg-indigo-950/40 border border-indigo-500/30 rounded-xl p-3.5 flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-file-pdf text-indigo-400 text-lg"></i>
+                <div>
+                  <div class="text-xs font-semibold text-indigo-200">Recommended Resume Variant</div>
+                  <a :href="'/api/resumes/view/' + encodeURIComponent(analysisResult?.recommended_resume)" target="_blank" class="text-xs font-mono text-indigo-300 hover:text-indigo-200 underline font-semibold flex items-center space-x-1 mt-0.5">
+                    <span x-text="analysisResult?.recommended_resume"></span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                  </a>
+                </div>
+              </div>
+              <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30 font-medium">Optimal Fit</span>
+            </div>
+
+            <!-- Category Scores -->
+            <div>
+              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">Category Breakdown</h4>
+              <div class="space-y-2.5">
+                <template x-for="(cat, name) in analysisResult?.score_breakdown?.category_scores" :key="name">
+                  <div class="bg-slate-900/80 rounded-xl p-2.5 border border-slate-800">
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="font-semibold text-slate-300" x-text="name"></span>
+                      <span class="font-mono text-emerald-400 font-bold" x-text="cat.awarded_points + ' / ' + cat.max_points"></span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                      <div class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-1.5 rounded-full" :style="'width: ' + ((cat.awarded_points / cat.max_points) * 100) + '%'"></div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1" x-text="cat.reason"></p>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Strengths & Gaps -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <div class="bg-emerald-950/20 border border-emerald-500/20 rounded-xl p-3">
+                <div class="text-xs font-bold text-emerald-400 flex items-center space-x-1.5 mb-1.5">
+                  <i class="fa-solid fa-check"></i>
+                  <span>Verified Strengths</span>
+                </div>
+                <ul class="text-xs text-slate-300 space-y-1">
+                  <template x-for="s in analysisResult?.score_breakdown?.key_strengths" :key="s">
+                    <li class="flex items-start space-x-1.5">
+                      <span class="text-emerald-400">•</span>
+                      <span x-text="s"></span>
+                    </li>
+                  </template>
+                </ul>
+              </div>
+
+              <div class="bg-rose-950/20 border border-rose-500/20 rounded-xl p-3">
+                <div class="text-xs font-bold text-rose-400 flex items-center space-x-1.5 mb-1.5">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                  <span>Missing Requirements</span>
+                </div>
+                <ul class="text-xs text-slate-300 space-y-1">
+                  <template x-for="g in analysisResult?.score_breakdown?.key_gaps" :key="g">
+                    <li class="flex items-start space-x-1.5">
+                      <span class="text-rose-400">•</span>
+                      <span x-text="g"></span>
+                    </li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+
+            <div class="pt-2 text-center text-xs text-slate-500" x-show="analysisResult?.excel_synced">
+              <i class="fa-solid fa-file-excel text-emerald-500 mr-1"></i>
+              <span>Application saved and synchronized to <b>data/tracker.xlsx</b></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 2: CANDIDATE PROFILE EDITOR -->
+    <!-- ================================================================= -->
+    <section x-cloak x-show="activeTab === 'profile'" class="space-y-6">
+      <div class="glass-card rounded-2xl p-6 shadow-xl space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center space-x-2">
+              <i class="fa-solid fa-id-card text-indigo-400"></i>
+              <span>Candidate Profile (Single Source of Truth)</span>
+            </h2>
+            <p class="text-xs text-slate-400">All information here is verified. The AI agent will NEVER hallucinate outside this profile.</p>
+          </div>
+          <button @click="saveProfile()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all shadow-md flex items-center space-x-2">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Save Profile</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Full Name</label>
+            <input type="text" x-model="profile.candidate.name" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Email</label>
+            <input type="email" x-model="profile.candidate.email" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Location</label>
+            <input type="text" x-model="profile.candidate.location" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Portfolio URL</label>
+            <input type="text" x-model="profile.candidate.portfolio" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">GitHub URL</label>
+            <input type="text" x-model="profile.candidate.github" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">itch.io / Demos</label>
+            <input type="text" x-model="profile.candidate.itch_io" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+          </div>
+        </div>
+
+        <!-- Skills Taxonomy -->
+        <div class="border-t border-slate-800 pt-5 space-y-4">
+          <h3 class="text-xs font-bold uppercase text-slate-400 tracking-wider">Skills Taxonomy across Tech Domains</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Programming Languages (Comma separated)</label>
+              <input type="text" :value="profile.skills.languages.join(', ')" @input="profile.skills.languages = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Game Engines (Unity, Unreal, Godot)</label>
+              <input type="text" :value="profile.skills.engines.join(', ')" @input="profile.skills.engines = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Frameworks & Libraries (FastAPI, React, DOTS, etc.)</label>
+              <input type="text" :value="profile.skills.frameworks.join(', ')" @input="profile.skills.frameworks = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Tools & Platforms (Git, Docker, PostgreSQL, Redis)</label>
+              <input type="text" :value="profile.skills.tools.join(', ')" @input="profile.skills.tools = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 3: RESUME VARIANTS MANAGER -->
+    <!-- ================================================================= -->
+    <section x-cloak x-show="activeTab === 'resumes'" class="space-y-6">
+      <div class="glass-card rounded-2xl p-6 shadow-xl space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center space-x-2">
+              <i class="fa-solid fa-layer-group text-indigo-400"></i>
+              <span>Multi-Role Resume Registry</span>
+            </h2>
+            <p class="text-xs text-slate-400">Manually add resume variants, upload PDF files, and define target tech roles and focus keywords.</p>
+          </div>
+          <button @click="showAddResumeModal = true" class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 text-white font-semibold text-xs transition-all shadow-md flex items-center space-x-1.5 self-start">
+            <i class="fa-solid fa-plus"></i>
+            <span>Add Resume Variant</span>
+          </button>
+        </div>
+
+        <!-- Add/Edit Resume Modal -->
+        <div x-cloak x-show="showAddResumeModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div @click.away="showAddResumeModal = false" class="glass-card bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-2xl w-full shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-file-circle-plus text-indigo-400"></i>
+                <span>Add / Configure Resume Variant</span>
+              </h3>
+              <button @click="showAddResumeModal = false" class="text-slate-400 hover:text-slate-200">
+                <i class="fa-solid fa-xmark text-sm"></i>
+              </button>
+            </div>
+
+            <!-- Upload Resume File Box -->
+            <div class="p-4 rounded-xl border border-dashed border-slate-700 bg-slate-950/60 text-center space-y-2">
+              <i class="fa-solid fa-cloud-arrow-up text-indigo-400 text-2xl"></i>
+              <div class="text-xs text-slate-300 font-semibold">Upload PDF/Document to Resumes Folder</div>
+              <input type="file" @change="handleFileUpload($event)" accept=".pdf,.docx,.doc,.txt" class="block w-full text-xs text-slate-400 file:mr-4 file:py-1.5 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer">
+              <p class="text-[10px] text-slate-500" x-text="uploadedFileName ? 'Uploaded: ' + uploadedFileName : 'Supports .pdf, .docx files'"></p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Resume Title *</label>
+                <input type="text" x-model="newResume.title" placeholder="e.g. Senior Unity Gameplay Programmer Resume" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">File Name *</label>
+                <input type="text" x-model="newResume.filename" placeholder="e.g. unity_gameplay.pdf" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 focus:border-indigo-500 focus:outline-none">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Engineering Domain *</label>
+                <select x-model="newResume.domain" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
+                  <option value="Game Development">Game Development</option>
+                  <option value="Backend Engineering">Backend Engineering</option>
+                  <option value="Full-Stack Development">Full-Stack Development</option>
+                  <option value="AI / Machine Learning">AI / Machine Learning</option>
+                  <option value="DevOps & Cloud">DevOps & Cloud</option>
+                  <option value="Systems Programming">Systems Programming</option>
+                  <option value="General Software">General Software</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Primary Engine / Framework</label>
+                <input type="text" x-model="newResume.primary_engine" placeholder="e.g. Unity, Unreal Engine 5, FastAPI, React, None" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Priority Weight (1-10)</label>
+                <input type="number" min="1" max="10" x-model.number="newResume.priority_score" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Target Roles (Comma-separated) *</label>
+                <input type="text" placeholder="e.g. Gameplay Programmer, Unity Developer, Game Systems Engineer" :value="newResume.target_roles.join(', ')" @input="newResume.target_roles = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Focus Keywords & Capabilities (Comma-separated) *</label>
+                <input type="text" placeholder="e.g. c#, gameplay, combat mechanics, behavior trees, navmesh, scriptableobjects" :value="newResume.focus_areas.join(', ')" @input="newResume.focus_areas = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-800">
+              <button @click="showAddResumeModal = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">
+                Cancel
+              </button>
+              <button @click="saveNewResume()" :disabled="!newResume.title || !newResume.filename" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-md">
+                Save Resume Variant
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resume Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <template x-for="r in resumeVariants" :key="r.filename">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-3.5 flex flex-col justify-between hover:border-slate-700 transition-all">
+              <div class="space-y-3">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-semibold" x-text="r.domain"></span>
+                    <h3 class="text-sm font-bold text-white mt-1.5" x-text="r.title"></h3>
+                  </div>
+                  <button @click="deleteResume(r.filename)" title="Delete variant" class="text-slate-500 hover:text-rose-400 p-1">
+                    <i class="fa-solid fa-trash-can text-xs"></i>
+                  </button>
+                </div>
+
+                <div class="flex items-center justify-between bg-slate-950/70 p-2.5 rounded-xl border border-slate-800">
+                  <div class="flex items-center space-x-2 text-xs text-slate-300 font-mono">
+                    <i class="fa-solid fa-file-pdf text-rose-400"></i>
+                    <span x-text="r.filename"></span>
+                  </div>
+                  <a :href="'/api/resumes/view/' + encodeURIComponent(r.filename)" target="_blank" class="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 text-[11px] font-semibold transition-all flex items-center space-x-1.5 shadow-sm">
+                    <span>View PDF</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                  </a>
+                </div>
+
+                <div>
+                  <div class="text-[11px] font-semibold text-slate-400 mb-1">Target Roles:</div>
+                  <div class="flex flex-wrap gap-1">
+                    <template x-for="role in r.target_roles" :key="role">
+                      <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded" x-text="role"></span>
+                    </template>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="text-[11px] font-semibold text-slate-400 mb-1">Focus Areas:</div>
+                  <div class="flex flex-wrap gap-1">
+                    <template x-for="f in r.focus_areas" :key="f">
+                      <span class="text-[10px] bg-indigo-950/60 text-indigo-300 border border-indigo-500/20 px-1.5 py-0.5 rounded" x-text="f"></span>
+                    </template>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 font-mono">
+                <span x-text="'Engine: ' + (r.primary_engine || 'None')"></span>
+                <span x-text="'Priority: ' + r.priority_score + '/10'"></span>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 4: APPLICATION TRACKER (EXCEL SYNCED) -->
+    <!-- ================================================================= -->
+    <section x-cloak x-show="activeTab === 'tracker'" class="space-y-6">
+      <div class="glass-card rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center space-x-2">
+              <i class="fa-solid fa-table text-emerald-400"></i>
+              <span>Excel Application Tracker</span>
+            </h2>
+            <p class="text-xs text-slate-400">Live synchronized with <b>data/tracker.xlsx</b> (Backups automatically created in <b>data/backups/</b>).</p>
+          </div>
+          <div class="flex items-center space-x-2 self-start">
+            <button @click="loadApplications()" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center space-x-1.5">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              <span>Reload Excel</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tracker Batch Action Bar -->
+        <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="flex items-center space-x-2">
+            <button @click="selectAllTracker(true)" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg">
+              Select All
+            </button>
+            <button @click="selectAllTracker(false)" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg">
+              Select None
+            </button>
+            <span class="text-xs text-indigo-300 font-semibold px-2 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/30" x-text="getSelectedTrackerCount() + ' selected'"></span>
+          </div>
+
+          <div class="flex items-center space-x-3">
+            <label class="flex items-center space-x-1.5 text-xs text-slate-300 cursor-pointer">
+              <input type="checkbox" x-model="applyPreferences.prefer_email" class="rounded border-slate-700 bg-slate-900 text-indigo-600">
+              <span>Prefer Email</span>
+            </label>
+            <label class="flex items-center space-x-1.5 text-xs text-slate-300 cursor-pointer">
+              <input type="checkbox" x-model="applyPreferences.is_dry_run" class="rounded border-slate-700 bg-slate-900 text-indigo-600">
+              <span>Dry Run</span>
+            </label>
+            <button @click="applySelectedTracker()" :disabled="applying || getSelectedTrackerCount() === 0" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 disabled:opacity-50 text-white font-bold text-xs shadow-md flex items-center space-x-1.5">
+              <i x-show="applying" class="fa-solid fa-spinner fa-spin"></i>
+              <i x-show="!applying" class="fa-solid fa-paper-plane"></i>
+              <span>Apply to Selected</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+              <tr>
+                <th class="py-3 px-3 w-10">
+                  <input type="checkbox" @change="selectAllTracker($event.target.checked)" class="rounded border-slate-700 bg-slate-950 text-indigo-600">
+                </th>
+                <th class="py-3 px-3">App ID</th>
+                <th class="py-3 px-3">Company</th>
+                <th class="py-3 px-3">Job Title</th>
+                <th class="py-3 px-3">Score</th>
+                <th class="py-3 px-3">Status</th>
+                <th class="py-3 px-3">Method</th>
+                <th class="py-3 px-3">Resume Used</th>
+                <th class="py-3 px-3">Submission Details / Notes</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">
+              <template x-for="app in applications" :key="app.application_id">
+                <tr class="hover:bg-slate-900/40 transition-colors" :class="app.selected ? 'bg-indigo-950/20' : ''">
+                  <td class="py-3 px-3">
+                    <input type="checkbox" x-model="app.selected" class="rounded border-slate-700 bg-slate-950 text-indigo-600">
+                  </td>
+                  <td class="py-3 px-3 font-mono text-slate-400 font-semibold" x-text="app.application_id"></td>
+                  <td class="py-3 px-3 font-bold text-white" x-text="app.company"></td>
+                  <td class="py-3 px-3 text-slate-300" x-text="app.job_title"></td>
+                  <td class="py-3 px-3">
+                    <span class="font-bold text-emerald-400" x-text="app.match_score"></span>
+                  </td>
+                  <td class="py-3 px-3">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase" :class="app.status === 'READY' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : (app.status === 'APPLIED' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-slate-800 text-slate-400')" x-text="app.status"></span>
+                  </td>
+                  <td class="py-3 px-3 text-indigo-300 font-mono text-[11px]" x-text="app.application_method || 'Email (Gmail)'"></td>
+                  <td class="py-3 px-3 font-mono text-slate-400">
+                    <a x-show="app.resume_used" :href="'/api/resumes/view/' + encodeURIComponent(app.resume_used)" target="_blank" class="text-indigo-400 hover:text-indigo-300 underline flex items-center space-x-1">
+                      <span x-text="app.resume_used"></span>
+                      <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                    </a>
+                    <span x-show="!app.resume_used">—</span>
+                  </td>
+                  <td class="py-3 px-3 text-slate-400 max-w-xs truncate" x-text="app.submission_details || app.notes"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 5: AI & GMAIL SETTINGS -->
+    <!-- ================================================================= -->
+    <section x-cloak x-show="activeTab === 'settings'" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Left: AI Provider Settings -->
+        <div class="glass-card rounded-2xl p-6 shadow-xl space-y-6">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-robot text-purple-400"></i>
+                <span>AI Provider & Model Settings</span>
+              </h2>
+              <p class="text-xs text-slate-400">OpenAI, Google Gemini, Ollama (Local), or Custom.</p>
+            </div>
+            <button @click="testAiConnection()" :disabled="testingConnection" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs transition-all shadow-md flex items-center space-x-1.5">
+              <i x-show="testingConnection" class="fa-solid fa-spinner fa-spin"></i>
+              <i x-show="!testingConnection" class="fa-solid fa-plug"></i>
+              <span>Test AI</span>
+            </button>
+          </div>
+
+          <!-- Connection Test Result -->
+          <div x-cloak x-show="testResult" class="p-3 rounded-xl border text-xs font-mono" :class="testResult?.success ? 'bg-emerald-950/40 border-emerald-500 text-emerald-300' : 'bg-rose-950/40 border-rose-500 text-rose-300'">
+            <div class="font-bold mb-1" x-text="testResult?.message"></div>
+            <div x-show="testResult?.reply" x-text="'Response: ' + testResult?.reply"></div>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">AI Provider</label>
+              <select x-model="aiSettings.provider_type" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+                <option value="openai">OpenAI (GPT-4o, GPT-4o-mini)</option>
+                <option value="gemini">Google Gemini (Gemini 1.5 Flash / Pro)</option>
+                <option value="ollama">Ollama (Local LLM: Llama 3, Mistral, DeepSeek)</option>
+                <option value="custom_openai">Custom OpenAI-Compatible (LM Studio / Local)</option>
+                <option value="mock">Offline / Heuristic Parser (No API Needed)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Model Name</label>
+              <input type="text" x-model="aiSettings.model" placeholder="e.g. gpt-4o-mini, gemini-1.5-flash" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+            </div>
+
+            <div x-show="aiSettings.provider_type !== 'mock' && aiSettings.provider_type !== 'ollama'">
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">API Key</label>
+              <input type="password" x-model="aiSettings.api_key" placeholder="Enter API key" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+            </div>
+
+            <div x-show="aiSettings.provider_type === 'ollama' || aiSettings.provider_type === 'custom_openai'">
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Custom Base URL</label>
+              <input type="text" x-model="aiSettings.base_url" placeholder="e.g. http://localhost:11434/v1" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+            </div>
+
+            <div class="pt-2">
+              <button @click="saveAiSettings()" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs transition-all shadow-md">
+                Save AI Settings
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Gmail & Email Integration Settings -->
+        <div class="glass-card rounded-2xl p-6 shadow-xl space-y-6">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-envelope text-emerald-400"></i>
+                <span>User Gmail & HR Mailer</span>
+              </h2>
+              <p class="text-xs text-slate-400">Connect your Gmail to send applications directly to hiring managers.</p>
+            </div>
+            <button @click="testEmailConnection()" :disabled="testingEmail" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-md flex items-center space-x-1.5">
+              <i x-show="testingEmail" class="fa-solid fa-spinner fa-spin"></i>
+              <i x-show="!testingEmail" class="fa-solid fa-envelope-circle-check"></i>
+              <span>Test Gmail</span>
+            </button>
+          </div>
+
+          <!-- Email Test Result -->
+          <div x-cloak x-show="emailTestResult" class="p-3 rounded-xl border text-xs font-mono" :class="emailTestResult?.success ? 'bg-emerald-950/40 border-emerald-500 text-emerald-300' : 'bg-rose-950/40 border-rose-500 text-rose-300'">
+            <div class="font-bold" x-text="emailTestResult?.message"></div>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Your Gmail Address *</label>
+              <input type="email" x-model="emailSettings.email_address" placeholder="your.name@gmail.com" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+                <span>Gmail App Password *</span>
+                <span class="text-[10px] text-slate-500 normal-case ml-2">(16-char code from Google Account -> Security -> App passwords)</span>
+              </label>
+              <input type="password" x-model="emailSettings.app_password" placeholder="xxxx xxxx xxxx xxxx" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Sender Display Name</label>
+              <input type="text" x-model="emailSettings.display_name" placeholder="e.g. John Doe" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <div class="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 text-[11px] text-slate-400 space-y-1">
+              <div class="font-semibold text-slate-300 flex items-center space-x-1.5">
+                <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                <span>How Google App Passwords Work:</span>
+              </div>
+              <p>Go to your <b>Google Account -> Security -> 2-Step Verification -> App Passwords</b>, create a password named "AutoApply", and paste it here.</p>
+            </div>
+
+            <div class="pt-1">
+              <button @click="saveEmailSettings()" :disabled="!emailSettings.email_address || !emailSettings.app_password" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-semibold text-xs transition-all shadow-md">
+                Save Gmail Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function jobAgentApp() {
+      return {
+        activeTab: 'discovery',
+        analyzing: false,
+        scraping: false,
+        applying: false,
+        testingConnection: false,
+        testingEmail: false,
+        testResult: null,
+        emailTestResult: null,
+        showBatchApplyModal: false,
+        batchApplyResults: [],
+        toast: { show: false, message: '', type: 'success' },
+
+        presets: [],
+        discoveryForm: {
+          selected_presets: ['phoenixlabs', 'riotgames', 'supercell', 'roblox'],
+          custom_targets: [],
+          keywords: ['Unity', 'Gameplay', 'Game Programmer', 'Backend', 'Software Engineer', 'C#', 'Python'],
+          locations: [],
+          remote_only: false,
+          auto_score_and_sync: true,
+          max_jobs_per_source: 10
+        },
+        newCustomTarget: { type: 'greenhouse', target: '' },
+        discoveryResponse: null,
+
+        applyPreferences: {
+          prefer_email: true,
+          is_dry_run: true
+        },
+
+        analyzerForm: {
+          raw_jd_text: '',
+          application_url: '',
+          source: 'Direct Company Careers',
+          sync_to_excel: true
+        },
+        analysisResult: null,
+
+        profile: {
+          candidate: {},
+          skills: { languages: [], engines: [], frameworks: [], tools: [], game_systems: [] },
+          preferences: { roles: [] }
+        },
+
+        showAddResumeModal: false,
+        uploadedFileName: '',
+        newResume: {
+          title: '',
+          filename: '',
+          domain: 'Game Development',
+          primary_engine: 'Unity',
+          priority_score: 8,
+          target_roles: [],
+          focus_areas: []
+        },
+
+        resumeVariants: [],
+        applications: [],
+
+        aiSettings: {
+          provider_type: 'openai',
+          model: 'gpt-4o-mini',
+          base_url: '',
+          api_key: '',
+          is_available: false
+        },
+
+        emailSettings: {
+          email_address: '',
+          app_password: '',
+          display_name: '',
+          has_password: false
+        },
+
+        showToast(message, type = 'success') {
+          this.toast = { show: true, message, type };
+          setTimeout(() => { this.toast.show = false; }, 3500);
+        },
+
+        async initApp() {
+          await this.loadPresets();
+          await this.loadAiSettings();
+          await this.loadEmailSettings();
+          await this.loadResumes();
+          await this.loadApplications();
+        },
+
+        // --- Batch Selection Helpers ---
+        selectAllDiscovered(value) {
+          if (!this.discoveryResponse || !this.discoveryResponse.results) return;
+          this.discoveryResponse.results.forEach(r => r.selected = value);
+        },
+
+        getSelectedDiscoveredCount() {
+          if (!this.discoveryResponse || !this.discoveryResponse.results) return 0;
+          return this.discoveryResponse.results.filter(r => r.selected).length;
+        },
+
+        selectAllTracker(value) {
+          this.applications.forEach(a => a.selected = value);
+        },
+
+        getSelectedTrackerCount() {
+          return this.applications.filter(a => a.selected).length;
+        },
+
+        async applySelectedDiscovered() {
+          const selected = (this.discoveryResponse?.results || []).filter(r => r.selected);
+          if (selected.length === 0) return;
+
+          const items = selected.map(s => ({
+            company: s.discovered_job.company,
+            job_title: s.discovered_job.title,
+            job_url: s.discovered_job.url,
+            application_url: s.discovered_job.url,
+            location: s.discovered_job.location,
+            resume_used: s.recommended_resume
+          }));
+
+          await this._executeBatchApply(items);
+        },
+
+        async applySelectedTracker() {
+          const selected = this.applications.filter(a => a.selected);
+          if (selected.length === 0) return;
+
+          const items = selected.map(s => ({
+            application_id: s.application_id,
+            company: s.company,
+            job_title: s.job_title,
+            job_url: s.job_url,
+            application_url: s.application_url || s.job_url,
+            location: s.location,
+            resume_used: s.resume_used,
+            notes: s.notes
+          }));
+
+          await this._executeBatchApply(items);
+        },
+
+        async _executeBatchApply(items) {
+          this.applying = true;
+          try {
+            const res = await fetch('/api/applications/apply-batch', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                items: items,
+                prefer_email: this.applyPreferences.prefer_email,
+                is_dry_run: this.applyPreferences.is_dry_run
+              })
+            });
+            if (!res.ok) throw new Error(await res.text());
+            const data = await res.json();
+            this.batchApplyResults = data.results;
+            this.showBatchApplyModal = true;
+            this.showToast(`Applied to ${data.count} roles (${data.is_dry_run ? 'Dry Run Preview' : 'Live Submitted'})!`);
+            await this.loadApplications();
+          } catch (e) {
+            this.showToast('Batch apply error: ' + e.message, 'error');
+          } finally {
+            this.applying = false;
+          }
+        },
+
+        // --- File Upload & Resumes ---
+        async handleFileUpload(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+          const formData = new FormData();
+          formData.append('file', file);
+          try {
+            const res = await fetch('/api/resumes/upload', {
+              method: 'POST',
+              body: formData
+            });
+            if (!res.ok) throw new Error(await res.text());
+            const data = await res.json();
+            this.uploadedFileName = data.filename;
+            this.newResume.filename = data.filename;
+            if (!this.newResume.title) {
+              const base = data.filename.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+              this.newResume.title = base.replace(/\b\w/g, l => l.toUpperCase()) + ' Resume';
+            }
+            this.showToast('Resume file uploaded successfully!');
+          } catch (e) {
+            this.showToast('Upload failed: ' + e.message, 'error');
+          }
+        },
+
+        async saveNewResume() {
+          if (!this.newResume.title || !this.newResume.filename) return;
+          try {
+            const res = await fetch('/api/resumes/add', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.newResume)
+            });
+            if (!res.ok) throw new Error(await res.text());
+            this.showToast('Resume variant added successfully!');
+            this.showAddResumeModal = false;
+            this.newResume = {
+              title: '',
+              filename: '',
+              domain: 'Game Development',
+              primary_engine: 'Unity',
+              priority_score: 8,
+              target_roles: [],
+              focus_areas: []
+            };
+            this.uploadedFileName = '';
+            await this.loadResumes();
+          } catch (e) {
+            this.showToast('Failed to save resume: ' + e.message, 'error');
+          }
+        },
+
+        async deleteResume(filename) {
+          if (!confirm(`Are you sure you want to remove resume variant '${filename}'?`)) return;
+          try {
+            const res = await fetch(`/api/resumes/${encodeURIComponent(filename)}`, {
+              method: 'DELETE'
+            });
+            if (!res.ok) throw new Error(await res.text());
+            this.showToast(`Resume '${filename}' removed.`);
+            await this.loadResumes();
+          } catch (e) {
+            this.showToast('Delete failed: ' + e.message, 'error');
+          }
+        },
+
+        async loadPresets() {
+          try {
+            const res = await fetch('/api/discovery/presets');
+            this.presets = await res.json();
+          } catch (e) {
+            console.error('Error loading presets:', e);
+          }
+        },
+
+        addCustomTarget() {
+          if (!this.newCustomTarget.target.trim()) return;
+          this.discoveryForm.custom_targets.push({ ...this.newCustomTarget });
+          this.newCustomTarget.target = '';
+        },
+
+        async runDiscovery() {
+          this.scraping = true;
+          this.discoveryResponse = null;
+          try {
+            const res = await fetch('/api/discovery/scrape', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.discoveryForm)
+            });
+            if (!res.ok) throw new Error(await res.text());
+            const data = await res.json();
+            // initialize selected = false
+            if (data.results) {
+              data.results.forEach(r => r.selected = false);
+            }
+            this.discoveryResponse = data;
+            this.showToast(`Scraped ${data.total_discovered} jobs (${data.new_jobs_processed} new matched & synced)!`);
+            await this.loadApplications();
+          } catch (e) {
+            this.showToast('Discovery failed: ' + e.message, 'error');
+          } finally {
+            this.scraping = false;
+          }
+        },
+
+        loadSampleJD() {
+          this.analyzerForm.application_url = 'https://careers.phoenixinteractive.example.com/jobs/gameplay-programmer';
+          this.analyzerForm.raw_jd_text = `Unity Gameplay Programmer - Phoenix Interactive
+Location: Remote (US / Global)
+Employment Type: Full-time
+Contact: careers@phoenixinteractive.example.com
+
+About the Role:
+Phoenix Interactive is crafting a 3D action roguelite title in Unity. We are seeking a talented Gameplay Programmer to build player character abilities, combat systems, and enemy AI.
+
+Key Responsibilities:
+• Implement 3rd-person character mechanics, combat combos, and animation integration in Unity C#.
+• Collaborate with designers using ScriptableObjects.
+• Build scalable enemy AI behaviors (Behavior Trees, state machines, and NavMesh).
+• Author UI screens and custom developer tools using Unity UI Toolkit and uGUI.
+
+Qualifications:
+• Strong C# proficiency and object-oriented design.
+• 1+ years experience in game development with Unity.
+• Experience with combat systems, character controllers, and AI.
+• Bachelor's degree in Computer Science or Game Engineering.`;
+        },
+
+        async runAnalysis() {
+          if (!this.analyzerForm.raw_jd_text) return;
+          this.analyzing = true;
+          this.analysisResult = null;
+          try {
+            const res = await fetch('/api/analyze-jd', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.analyzerForm)
+            });
+            if (!res.ok) throw new Error(await res.text());
+            this.analysisResult = await res.json();
+            this.showToast('Job analyzed and matched successfully!');
+            await this.loadApplications();
+          } catch (e) {
+            this.showToast('Analysis error: ' + e.message, 'error');
+          } finally {
+            this.analyzing = false;
+          }
+        },
+
+        async loadProfile() {
+          try {
+            const res = await fetch('/api/profile');
+            this.profile = await res.json();
+          } catch (e) {
+            this.showToast('Failed to load profile', 'error');
+          }
+        },
+
+        async saveProfile() {
+          try {
+            const res = await fetch('/api/profile', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.profile)
+            });
+            if (!res.ok) throw new Error(await res.text());
+            this.showToast('Candidate profile saved successfully!');
+          } catch (e) {
+            this.showToast('Save failed: ' + e.message, 'error');
+          }
+        },
+
+        async loadResumes() {
+          try {
+            const res = await fetch('/api/resumes');
+            this.resumeVariants = await res.json();
+          } catch (e) {
+            console.error('Error loading resumes:', e);
+          }
+        },
+
+        async loadApplications() {
+          try {
+            const res = await fetch('/api/applications');
+            const data = await res.json();
+            const rawApps = data.applications || [];
+            this.applications = rawApps.map(a => ({ ...a, selected: false }));
+          } catch (e) {
+            console.error('Error loading applications:', e);
+          }
+        },
+
+        async loadAiSettings() {
+          try {
+            const res = await fetch('/api/settings/ai');
+            const data = await res.json();
+            this.aiSettings.provider_type = data.provider_type || 'openai';
+            this.aiSettings.model = data.model || 'gpt-4o-mini';
+            this.aiSettings.base_url = data.base_url || '';
+            this.aiSettings.api_key = data.api_key || '';
+            this.aiSettings.is_available = data.is_available || false;
+          } catch (e) {
+            console.error('Error loading AI settings:', e);
+          }
+        },
+
+        async saveAiSettings() {
+          try {
+            const res = await fetch('/api/settings/ai', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.aiSettings)
+            });
+            if (!res.ok) throw new Error(await res.text());
+            this.showToast('AI Settings saved successfully!');
+            await this.loadAiSettings();
+          } catch (e) {
+            this.showToast('Error saving settings: ' + e.message, 'error');
+          }
+        },
+
+        async testAiConnection() {
+          this.testingConnection = true;
+          this.testResult = null;
+          try {
+            const res = await fetch('/api/settings/ai/test', { method: 'POST' });
+            this.testResult = await res.json();
+          } catch (e) {
+            this.testResult = { success: false, message: e.message };
+          } finally {
+            this.testingConnection = false;
+          }
+        },
+
+        async loadEmailSettings() {
+          try {
+            const res = await fetch('/api/settings/email');
+            const data = await res.json();
+            this.emailSettings.email_address = data.email_address || '';
+            this.emailSettings.app_password = data.app_password || '';
+            this.emailSettings.display_name = data.display_name || '';
+            this.emailSettings.has_password = data.has_password || false;
+          } catch (e) {
+            console.error('Error loading email settings:', e);
+          }
+        },
+
+        async saveEmailSettings() {
+          try {
+            const res = await fetch('/api/settings/email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.emailSettings)
+            });
+            if (!res.ok) throw new Error(await res.text());
+            this.showToast('Gmail settings saved successfully!');
+            await this.loadEmailSettings();
+          } catch (e) {
+            this.showToast('Failed to save email settings: ' + e.message, 'error');
+          }
+        },
+
+        async testEmailConnection() {
+          this.testingEmail = true;
+          this.emailTestResult = null;
+          try {
+            const res = await fetch('/api/settings/email/test', { method: 'POST' });
+            this.emailTestResult = await res.json();
+          } catch (e) {
+            this.emailTestResult = { success: false, message: e.message };
+          } finally {
+            this.testingEmail = false;
+          }
+        }
+      };
+    }
+  </script>
+</body>
+</html>

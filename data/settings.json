@@ -1,0 +1,17 @@
+{
+  "ai": {
+    "provider_type": "openai",
+    "model": "gpt-4o",
+    "base_url": "https://api.openai.com/v1",
+    "api_key": "sk-test-secret-key-12345",
+    "temperature": 0.2
+  },
+  "email": {
+    "email_address": "applicant.gameplay@gmail.com",
+    "app_password": "abcd efgh ijkl mnop",
+    "display_name": "Game Dev Applicant",
+    "smtp_host": "smtp.gmail.com",
+    "smtp_port": 587,
+    "use_tls": true
+  }
+}
