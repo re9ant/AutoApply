@@ -203,7 +203,7 @@
             <div class="space-y-3 pt-1">
               <div>
                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Role & Tech Keywords (Comma-separated)</label>
-                <input type="text" :value="discoveryForm.keywords.join(', ')" @input="discoveryForm.keywords = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+                <input type="text" x-model="discoveryForm.keywords_text" placeholder="e.g. Unity, Gameplay, Game Programmer, Backend, Software Engineer, C#, Python" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
               </div>
 
               <div class="flex items-center justify-between">
@@ -543,20 +543,28 @@
           <h3 class="text-xs font-bold uppercase text-slate-400 tracking-wider">Skills Taxonomy across Tech Domains</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-400 mb-1">Programming Languages (Comma separated)</label>
-              <input type="text" :value="profile.skills.languages.join(', ')" @input="profile.skills.languages = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Programming Languages (Comma-separated)</label>
+              <input type="text" x-model="profileForm.languages_text" placeholder="e.g. C#, C++, Python, TypeScript, SQL, HLSL" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-400 mb-1">Game Engines (Unity, Unreal, Godot)</label>
-              <input type="text" :value="profile.skills.engines.join(', ')" @input="profile.skills.engines = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Game Engines (Comma-separated)</label>
+              <input type="text" x-model="profileForm.engines_text" placeholder="e.g. Unity (2021/2022/6), Unreal Engine 5, Godot" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-400 mb-1">Frameworks & Libraries (FastAPI, React, DOTS, etc.)</label>
-              <input type="text" :value="profile.skills.frameworks.join(', ')" @input="profile.skills.frameworks = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Frameworks & Libraries (Comma-separated)</label>
+              <input type="text" x-model="profileForm.frameworks_text" placeholder="e.g. FastAPI, React, Next.js, Django, Unity DOTS, Netcode" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-400 mb-1">Tools & Platforms (Git, Docker, PostgreSQL, Redis)</label>
-              <input type="text" :value="profile.skills.tools.join(', ')" @input="profile.skills.tools = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Tools & Platforms (Comma-separated)</label>
+              <input type="text" x-model="profileForm.tools_text" placeholder="e.g. Git, Docker, PostgreSQL, Redis, Rider, RenderDoc" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Game Systems & Architecture (Comma-separated)</label>
+              <input type="text" x-model="profileForm.game_systems_text" placeholder="e.g. Combat Mechanics, AI & Behavior Trees, NavMesh, State Machines, UI Toolkit, ScriptableObjects" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Target / Preferred Roles (Comma-separated)</label>
+              <input type="text" x-model="profileForm.roles_text" placeholder="e.g. Gameplay Programmer, Unity Developer, Backend Engineer, Game Systems Programmer" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
             </div>
           </div>
         </div>
@@ -639,12 +647,12 @@
 
               <div class="md:col-span-2">
                 <label class="block text-xs font-semibold text-slate-400 mb-1">Target Roles (Comma-separated) *</label>
-                <input type="text" placeholder="e.g. Gameplay Programmer, Unity Developer, Game Systems Engineer" :value="newResume.target_roles.join(', ')" @input="newResume.target_roles = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
+                <input type="text" placeholder="e.g. Gameplay Programmer, Unity Developer, Game Systems Engineer" x-model="newResume.target_roles_text" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
               </div>
 
               <div class="md:col-span-2">
                 <label class="block text-xs font-semibold text-slate-400 mb-1">Focus Keywords & Capabilities (Comma-separated) *</label>
-                <input type="text" placeholder="e.g. c#, gameplay, combat mechanics, behavior trees, navmesh, scriptableobjects" :value="newResume.focus_areas.join(', ')" @input="newResume.focus_areas = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
+                <input type="text" placeholder="e.g. c#, gameplay, combat mechanics, behavior trees, navmesh, scriptableobjects" x-model="newResume.focus_areas_text" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">
               </div>
             </div>
 
@@ -958,6 +966,7 @@
         discoveryForm: {
           selected_presets: ['phoenixlabs', 'riotgames', 'supercell', 'roblox'],
           custom_targets: [],
+          keywords_text: 'Unity, Gameplay, Game Programmer, Backend, Software Engineer, C#, Python',
           keywords: ['Unity', 'Gameplay', 'Game Programmer', 'Backend', 'Software Engineer', 'C#', 'Python'],
           locations: [],
           remote_only: false,
@@ -985,6 +994,14 @@
           skills: { languages: [], engines: [], frameworks: [], tools: [], game_systems: [] },
           preferences: { roles: [] }
         },
+        profileForm: {
+          languages_text: '',
+          engines_text: '',
+          frameworks_text: '',
+          tools_text: '',
+          game_systems_text: '',
+          roles_text: ''
+        },
 
         showAddResumeModal: false,
         uploadedFileName: '',
@@ -994,6 +1011,8 @@
           domain: 'Game Development',
           primary_engine: 'Unity',
           priority_score: 8,
+          target_roles_text: '',
+          focus_areas_text: '',
           target_roles: [],
           focus_areas: []
         },
@@ -1027,6 +1046,7 @@
           await this.loadEmailSettings();
           await this.loadResumes();
           await this.loadApplications();
+          await this.loadProfile();
         },
 
         // --- Batch Selection Helpers ---
@@ -1135,10 +1155,21 @@
         async saveNewResume() {
           if (!this.newResume.title || !this.newResume.filename) return;
           try {
+            const parseList = (txt) => (txt || '').split(',').map(s => s.trim()).filter(Boolean);
+            const payload = {
+              title: this.newResume.title,
+              filename: this.newResume.filename,
+              domain: this.newResume.domain,
+              primary_engine: this.newResume.primary_engine,
+              priority_score: Number(this.newResume.priority_score) || 8,
+              target_roles: parseList(this.newResume.target_roles_text),
+              focus_areas: parseList(this.newResume.focus_areas_text)
+            };
+
             const res = await fetch('/api/resumes/add', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(this.newResume)
+              body: JSON.stringify(payload)
             });
             if (!res.ok) throw new Error(await res.text());
             this.showToast('Resume variant added successfully!');
@@ -1149,6 +1180,8 @@
               domain: 'Game Development',
               primary_engine: 'Unity',
               priority_score: 8,
+              target_roles_text: '',
+              focus_areas_text: '',
               target_roles: [],
               focus_areas: []
             };
@@ -1192,14 +1225,20 @@
           this.scraping = true;
           this.discoveryResponse = null;
           try {
+            const parseList = (txt) => (txt || '').split(',').map(s => s.trim()).filter(Boolean);
+            const parsedKeywords = parseList(this.discoveryForm.keywords_text);
+            const payload = {
+              ...this.discoveryForm,
+              keywords: parsedKeywords.length ? parsedKeywords : this.discoveryForm.keywords
+            };
+
             const res = await fetch('/api/discovery/scrape', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(this.discoveryForm)
+              body: JSON.stringify(payload)
             });
             if (!res.ok) throw new Error(await res.text());
             const data = await res.json();
-            // initialize selected = false
             if (data.results) {
               data.results.forEach(r => r.selected = false);
             }
@@ -1261,6 +1300,14 @@ Qualifications:
           try {
             const res = await fetch('/api/profile');
             this.profile = await res.json();
+            const s = this.profile.skills || {};
+            const p = this.profile.preferences || {};
+            this.profileForm.languages_text = (s.languages || []).join(', ');
+            this.profileForm.engines_text = (s.engines || []).join(', ');
+            this.profileForm.frameworks_text = (s.frameworks || []).join(', ');
+            this.profileForm.tools_text = (s.tools || []).join(', ');
+            this.profileForm.game_systems_text = (s.game_systems || []).join(', ');
+            this.profileForm.roles_text = (p.roles || []).join(', ');
           } catch (e) {
             this.showToast('Failed to load profile', 'error');
           }
@@ -1268,6 +1315,18 @@ Qualifications:
 
         async saveProfile() {
           try {
+            if (!this.profile.skills) this.profile.skills = {};
+            if (!this.profile.preferences) this.profile.preferences = {};
+
+            const parseList = (txt) => (txt || '').split(',').map(s => s.trim()).filter(Boolean);
+
+            this.profile.skills.languages = parseList(this.profileForm.languages_text);
+            this.profile.skills.engines = parseList(this.profileForm.engines_text);
+            this.profile.skills.frameworks = parseList(this.profileForm.frameworks_text);
+            this.profile.skills.tools = parseList(this.profileForm.tools_text);
+            this.profile.skills.game_systems = parseList(this.profileForm.game_systems_text);
+            this.profile.preferences.roles = parseList(this.profileForm.roles_text);
+
             const res = await fetch('/api/profile', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -1275,6 +1334,7 @@ Qualifications:
             });
             if (!res.ok) throw new Error(await res.text());
             this.showToast('Candidate profile saved successfully!');
+            await this.loadProfile();
           } catch (e) {
             this.showToast('Save failed: ' + e.message, 'error');
           }
