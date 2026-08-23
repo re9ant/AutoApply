@@ -33,13 +33,15 @@ class ApplicationRecord(BaseModel):
     resume_used: Optional[str] = None
     cover_letter: Optional[str] = None
     source: str = Field(default="Manual / Direct")
+    application_method: Optional[str] = Field(default="Email (Gmail)", description="Email (Gmail), Browser (Playwright), or Direct ATS")
+    submission_details: Optional[str] = Field(default=None, description="Audit log of exact actions taken during application submission")
     notes: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     applied_at: Optional[datetime] = None
     last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     follow_up_date: Optional[str] = None
 
-    # Granular artifacts (stored internally, not cluttering Excel)
+    # Granular artifacts
     structured_jd: Optional[Dict[str, Any]] = None
     scoring_breakdown: Optional[Dict[str, Any]] = None
     field_answers: Optional[Dict[str, Any]] = None

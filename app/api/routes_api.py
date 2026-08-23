@@ -196,7 +196,56 @@ async def delete_resume_variant(filename: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# --- 5. Application Tracker Endpoints ---
+# --- 5. Application & Batch Apply Endpoints ---
+class BatchApplyItem(BaseModel):
+    application_id: Optional[str] = None
+    company: str
+    job_title: str
+    job_url: Optional[str] = None
+    application_url: Optional[str] = None
+    location: Optional[str] = "Unknown"
+    resume_used: Optional[str] = None
+    notes: Optional[str] = None
+
+
+class BatchApplyRequest(BaseModel):
+    items: List[BatchApplyItem]
+    prefer_email: bool = True
+    is_dry_run: bool = True
+
+
+@router.post("/applications/apply-batch")
+async def apply_batch(req: BatchApplyRequest):
+    try:
+        results = []
+        for item in req.items:
+            app = ApplicationRecord(
+                application_id=item.application_id or f"APP-{item.company[:4].upper()}-{item.job_title[:4].upper()}",
+                company=item.company,
+                job_title=item.job_title,
+                job_url=item.job_url,
+                application_url=item.application_url or item.job_url,
+                location=item.location,
+                resume_used=item.resume_used,
+                notes=item.notes
+            )
+            res = await application_service.apply_to_job(
+                app=app,
+                prefer_email=req.prefer_email,
+                is_dry_run=req.is_dry_run
+            )
+            results.append(res)
+        return {
+            "success": True,
+            "count": len(results),
+            "is_dry_run": req.is_dry_run,
+            "results": results
+        }
+    except Exception as e:
+        logger.error(f"Batch apply failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/applications")
 async def get_applications():
     try:
@@ -260,3 +309,43 @@ async def update_ai_settings(req: AIConfigUpdateRequest):
 async def test_ai_connection():
     result = await ai_client.test_connection()
     return result
+
+
+# --- 7. Email / Gmail Settings Endpoints ---
+class EmailSettingsRequest(BaseModel):
+    email_address: str
+    app_password: str
+    display_name: Optional[str] = None
+
+
+@router.get("/settings/email")
+async def get_email_settings():
+    from app.services.email_service import email_service
+    return {
+        "email_address": email_service.config.email_address or "",
+        "has_password": bool(email_service.config.app_password),
+        "display_name": email_service.config.display_name or "",
+        "smtp_host": email_service.config.smtp_host,
+        "smtp_port": email_service.config.smtp_port
+    }
+
+
+@router.post("/settings/email")
+async def update_email_settings(req: EmailSettingsRequest):
+    try:
+        from app.services.email_service import email_service, EmailAccountConfig
+        new_config = EmailAccountConfig(
+            email_address=req.email_address,
+            app_password=req.app_password,
+            display_name=req.display_name
+        )
+        email_service.set_config(new_config)
+        return {"success": True, "message": f"Gmail account '{req.email_address}' configured successfully!"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/settings/email/test")
+async def test_email_settings():
+    from app.services.email_service import email_service
+    return email_service.test_smtp_connection()

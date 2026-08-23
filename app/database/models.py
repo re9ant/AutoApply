@@ -38,6 +38,8 @@ class ApplicationModel(Base):
     application_url = Column(String(1024), nullable=True)
     match_score = Column(Float, nullable=True)
     status = Column(String(50), default="DISCOVERED", nullable=False)
+    application_method = Column(String(100), default="Email (Gmail)", nullable=True)
+    submission_details = Column(Text, nullable=True)
     resume_used = Column(String(255), nullable=True)
     cover_letter = Column(Text, nullable=True)
     notes = Column(Text, nullable=True)

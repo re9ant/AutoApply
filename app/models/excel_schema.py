@@ -9,7 +9,6 @@ class ExcelColumnDefinition(BaseModel):
     width: int = 18
 
 
-# Standard default columns & synonyms to recognize existing user workbooks
 DEFAULT_EXCEL_COLUMNS: List[ExcelColumnDefinition] = [
     ExcelColumnDefinition(
         key="application_id",
@@ -54,6 +53,18 @@ DEFAULT_EXCEL_COLUMNS: List[ExcelColumnDefinition] = [
         width=16
     ),
     ExcelColumnDefinition(
+        key="application_method",
+        canonical_header="Application Method",
+        aliases=["method", "applied via", "channel", "how applied", "route"],
+        width=22
+    ),
+    ExcelColumnDefinition(
+        key="submission_details",
+        canonical_header="Submission Details",
+        aliases=["details", "action log", "delivery status", "email sent to", "actions"],
+        width=30
+    ),
+    ExcelColumnDefinition(
         key="resume_used",
         canonical_header="Resume Used",
         aliases=["resume", "cv", "resume variant", "resume file"],
@@ -62,7 +73,7 @@ DEFAULT_EXCEL_COLUMNS: List[ExcelColumnDefinition] = [
     ExcelColumnDefinition(
         key="source",
         canonical_header="Source",
-        aliases=["job board", "platform", "discovered via", "channel"],
+        aliases=["job board", "platform", "discovered via"],
         width=16
     ),
     ExcelColumnDefinition(

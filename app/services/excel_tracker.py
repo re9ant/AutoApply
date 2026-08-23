@@ -168,6 +168,8 @@ class ExcelTracker:
             "job_type": app.job_type or "Full-time",
             "match_score": f"{int(app.match_score)}%" if app.match_score is not None else "",
             "status": app.status.value if isinstance(app.status, ApplicationStatus) else str(app.status),
+            "application_method": app.application_method or "Email (Gmail)",
+            "submission_details": app.submission_details or "",
             "resume_used": app.resume_used or "",
             "source": app.source or "Direct",
             "job_url": app.job_url or "",
