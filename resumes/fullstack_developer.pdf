@@ -1,0 +1,63 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 500 >>
+stream
+BT
+/F1 20 Tf
+50 720 Td
+(Full Stack Developer Resume) Tj
+/F2 12 Tf
+0 -30 Td
+(Candidate: Revanth - B.Tech CSE | Game Developer) Tj
+0 -20 Td
+(Email: candidate.revanth@gmail.com | GitHub: github.com/re9ant) Tj
+/F1 14 Tf
+0 -35 Td
+(Executive Summary) Tj
+/F2 10 Tf
+0 -18 Td
+(Full Stack Engineer building modern web apps with TypeScript, React, and FastAPI.) Tj
+/F1 14 Tf
+0 -35 Td
+(Core Competencies & Technologies) Tj
+/F2 10 Tf
+0 -18 Td
+(Tech Stack: TypeScript, React, Tailwind CSS, Alpine.js, Python, REST APIs) Tj
+/F1 14 Tf
+0 -35 Td
+(Featured Projects & Experience) Tj
+/F2 10 Tf
+0 -18 Td
+(Autonomous Application Dashboard: Reactive SPA frontend for job scraping and tracking.) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000244 00000 n 
+0000000800 00000 n 
+0000000870 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+935
+%%EOF
