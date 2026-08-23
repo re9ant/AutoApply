@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException, File, UploadFile
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from app.ai.client import ai_client
@@ -178,6 +179,27 @@ async def upload_resume_file(file: UploadFile = File(...)):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to upload file: {e}")
+
+
+@router.get("/resumes/view/{filename}")
+async def view_resume_file(filename: str):
+    try:
+        resumes_dir = settings.resolve_path(settings.RESUMES_DIR)
+        file_path = resumes_dir / filename
+
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail=f"Resume file '{filename}' not found on server.")
+
+        media_type = "application/pdf" if filename.lower().endswith(".pdf") else "application/octet-stream"
+        return FileResponse(
+            path=file_path,
+            media_type=media_type,
+            headers={"Content-Disposition": f'inline; filename="{filename}"'}
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/resumes/{filename}")

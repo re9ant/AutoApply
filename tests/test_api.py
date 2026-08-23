@@ -71,6 +71,14 @@ def test_upload_resume_file():
     assert response.json()["filename"] == "test_sample_resume.pdf"
 
 
+def test_view_resume_file():
+    # View the uploaded sample PDF
+    response = client.get("/api/resumes/view/test_sample_resume.pdf")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert "inline" in response.headers["content-disposition"]
+
+
 def test_get_ai_settings_api():
     response = client.get("/api/settings/ai")
     assert response.status_code == 200
