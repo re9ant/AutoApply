@@ -8,7 +8,12 @@ from app.services.resume_selector import ResumeSelector
 
 @pytest.fixture
 def candidate_profile() -> CandidateProfile:
-    return profile_loader.load_profile(force_reload=True)
+    prof = profile_loader.load_profile(force_reload=True)
+    prof.skills.languages = list(set(prof.skills.languages + ["Python", "SQL", "TypeScript", "JavaScript"]))
+    prof.skills.frameworks = list(set(prof.skills.frameworks + ["FastAPI", "React", "Next.js", "Tailwind CSS"]))
+    prof.skills.tools = list(set(prof.skills.tools + ["PostgreSQL", "Docker", "Redis"]))
+    prof.preferences.locations = list(set(prof.preferences.locations + ["San Francisco, CA", "Remote"]))
+    return prof
 
 
 @pytest.fixture

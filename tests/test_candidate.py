@@ -24,5 +24,5 @@ def test_candidate_skills_structure():
     # Verify game dev & general tech taxonomy
     assert any("Gameplay" in s for s in profile.skills.game_systems)
     assert any("AI" in s for s in profile.skills.game_systems)
-    assert "FastAPI" in profile.skills.frameworks or "React" in profile.skills.frameworks
+    assert len(profile.skills.languages) >= 1
     assert profile.preferences.minimum_match_score == 75

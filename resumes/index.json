@@ -70,7 +70,7 @@
       "UI Programmer",
       "Technical Artist"
     ],
-    "priority_score": 8
+    "priority_score": 9
   },
   {
     "filename": "backend_software_engineer.pdf",
@@ -96,7 +96,7 @@
       "Software Engineer",
       "API Engineer"
     ],
-    "priority_score": 8
+    "priority_score": 10
   },
   {
     "filename": "fullstack_developer.pdf",
@@ -119,6 +119,6 @@
       "Frontend Developer",
       "Web Developer"
     ],
-    "priority_score": 7
+    "priority_score": 10
   }
 ]

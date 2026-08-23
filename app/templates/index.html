@@ -309,12 +309,19 @@
                   </div>
                 </div>
 
-                <div class="flex items-center justify-between pt-1 border-t border-slate-800/60 text-xs">
-                  <div class="flex items-center space-x-1.5" x-show="res.recommended_resume">
-                    <span class="text-slate-500 text-[11px]">Resume:</span>
-                    <a :href="'/api/resumes/view/' + encodeURIComponent(res.recommended_resume)" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-[11px] font-mono underline font-medium flex items-center space-x-1">
-                      <span x-text="res.recommended_resume"></span>
-                      <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/60 text-xs">
+                  <div class="flex items-center space-x-1.5">
+                    <span class="text-slate-400 text-[11px] font-semibold flex items-center space-x-1">
+                      <i class="fa-solid fa-paperclip text-indigo-400 text-[10px]"></i>
+                      <span>Resume:</span>
+                    </span>
+                    <select x-model="res.recommended_resume" class="bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-[11px] font-mono text-indigo-300 focus:outline-none focus:border-indigo-500 max-w-[220px] truncate">
+                      <template x-for="rv in resumeVariants" :key="rv.filename">
+                        <option :value="rv.filename" x-text="rv.title" :selected="rv.filename === res.recommended_resume"></option>
+                      </template>
+                    </select>
+                    <a x-show="res.recommended_resume" :href="'/api/resumes/view/' + encodeURIComponent(res.recommended_resume)" target="_blank" title="View attached PDF in new tab" class="text-slate-400 hover:text-indigo-300 p-1">
+                      <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
                     </a>
                   </div>
                   <a :href="res.discovered_job.url" target="_blank" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center space-x-1 ml-auto">
@@ -416,19 +423,25 @@
               </div>
             </div>
 
-            <!-- Recommended Resume Callout -->
-            <div class="bg-indigo-950/40 border border-indigo-500/30 rounded-xl p-3.5 flex items-center justify-between">
+            <!-- Attached / Selected Resume Callout -->
+            <div class="bg-indigo-950/40 border border-indigo-500/30 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3">
               <div class="flex items-center space-x-3">
                 <i class="fa-solid fa-file-pdf text-indigo-400 text-lg"></i>
                 <div>
-                  <div class="text-xs font-semibold text-indigo-200">Recommended Resume Variant</div>
-                  <a :href="'/api/resumes/view/' + encodeURIComponent(analysisResult?.recommended_resume)" target="_blank" class="text-xs font-mono text-indigo-300 hover:text-indigo-200 underline font-semibold flex items-center space-x-1 mt-0.5">
-                    <span x-text="analysisResult?.recommended_resume"></span>
-                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                  </a>
+                  <div class="text-xs font-semibold text-indigo-200">Attached Resume Variant</div>
+                  <div class="flex items-center space-x-2 mt-1">
+                    <select x-model="analysisResult.recommended_resume" class="bg-slate-950 border border-slate-700/80 rounded-lg px-2.5 py-1 text-xs font-mono text-indigo-300 focus:outline-none focus:border-indigo-500">
+                      <template x-for="rv in resumeVariants" :key="rv.filename">
+                        <option :value="rv.filename" x-text="rv.title + ' (' + rv.filename + ')'" :selected="rv.filename === analysisResult?.recommended_resume"></option>
+                      </template>
+                    </select>
+                    <a x-show="analysisResult?.recommended_resume" :href="'/api/resumes/view/' + encodeURIComponent(analysisResult?.recommended_resume)" target="_blank" title="View attached PDF in new tab" class="text-slate-400 hover:text-indigo-300 p-1">
+                      <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    </a>
+                  </div>
                 </div>
               </div>
-              <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30 font-medium">Optimal Fit</span>
+              <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30 font-medium">Selected Fit</span>
             </div>
 
             <!-- Category Scores -->
@@ -813,11 +826,16 @@
                   </td>
                   <td class="py-3 px-3 text-indigo-300 font-mono text-[11px]" x-text="app.application_method || 'Email (Gmail)'"></td>
                   <td class="py-3 px-3 font-mono text-slate-400">
-                    <a x-show="app.resume_used" :href="'/api/resumes/view/' + encodeURIComponent(app.resume_used)" target="_blank" class="text-indigo-400 hover:text-indigo-300 underline flex items-center space-x-1">
-                      <span x-text="app.resume_used"></span>
-                      <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-                    </a>
-                    <span x-show="!app.resume_used">—</span>
+                    <div class="flex items-center space-x-1.5">
+                      <select x-model="app.resume_used" class="bg-slate-950 border border-slate-700/70 rounded-lg px-2 py-1 text-[11px] font-mono text-indigo-300 focus:outline-none focus:border-indigo-500 max-w-[170px] truncate">
+                        <template x-for="rv in resumeVariants" :key="rv.filename">
+                          <option :value="rv.filename" x-text="rv.filename" :selected="rv.filename === app.resume_used"></option>
+                        </template>
+                      </select>
+                      <a x-show="app.resume_used" :href="'/api/resumes/view/' + encodeURIComponent(app.resume_used)" target="_blank" title="View attached PDF" class="text-slate-400 hover:text-indigo-300 p-1">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                      </a>
+                    </div>
                   </td>
                   <td class="py-3 px-3 text-slate-400 max-w-xs truncate" x-text="app.submission_details || app.notes"></td>
                 </tr>
