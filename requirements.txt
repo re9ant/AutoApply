@@ -1,0 +1,29 @@
+# Core & Configuration
+pydantic>=2.7.0
+pydantic-settings>=2.2.0
+python-dotenv>=1.0.1
+email-validator>=2.1.0
+
+# Web Framework & GUI
+fastapi>=0.111.0
+uvicorn>=0.30.0
+jinja2>=3.1.4
+python-multipart>=0.0.9
+
+# AI & LLM (Multi-Provider Support)
+openai>=1.30.0
+httpx>=0.27.0
+
+# Excel Application Tracking
+openpyxl>=3.1.2
+
+# Database & State Management
+sqlalchemy>=2.0.30
+aiosqlite>=0.20.0
+
+# Utilities & CLI
+rich>=13.7.1
+
+# Testing
+pytest>=8.2.0
+pytest-asyncio>=0.23.6

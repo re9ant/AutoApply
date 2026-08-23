@@ -1,0 +1,122 @@
+[
+  {
+    "filename": "unity_gameplay.pdf",
+    "title": "Unity Gameplay Programmer Resume",
+    "domain": "Game Development",
+    "primary_engine": "Unity",
+    "focus_areas": [
+      "gameplay",
+      "mechanics",
+      "character controller",
+      "combat",
+      "ai",
+      "behavior trees",
+      "c#",
+      "scriptableobjects",
+      "physics"
+    ],
+    "target_roles": [
+      "Gameplay Programmer",
+      "Unity Developer",
+      "Game Programmer",
+      "Unity Gameplay Engineer",
+      "Game Systems Programmer"
+    ],
+    "priority_score": 10
+  },
+  {
+    "filename": "unity_tools.pdf",
+    "title": "Unity Tools & UI Programmer Resume",
+    "domain": "Game Development",
+    "primary_engine": "Unity",
+    "focus_areas": [
+      "tools",
+      "editor scripting",
+      "ui toolkit",
+      "ugui",
+      "pipeline",
+      "graphview",
+      "c#",
+      "custom inspectors"
+    ],
+    "target_roles": [
+      "Unity Tools Programmer",
+      "Tools Engineer",
+      "UI Programmer",
+      "Technical Artist"
+    ],
+    "priority_score": 8
+  },
+  {
+    "filename": "backend_software_engineer.pdf",
+    "title": "Backend Software Engineer Resume",
+    "domain": "Backend Engineering",
+    "primary_engine": "None",
+    "focus_areas": [
+      "python",
+      "fastapi",
+      "django",
+      "rest api",
+      "postgresql",
+      "redis",
+      "microservices",
+      "docker",
+      "sql",
+      "c#"
+    ],
+    "target_roles": [
+      "Backend Engineer",
+      "Backend Developer",
+      "Python Developer",
+      "Software Engineer",
+      "API Engineer"
+    ],
+    "priority_score": 8
+  },
+  {
+    "filename": "fullstack_developer.pdf",
+    "title": "Full Stack Developer Resume",
+    "domain": "Full-Stack Development",
+    "primary_engine": "None",
+    "focus_areas": [
+      "typescript",
+      "react",
+      "next.js",
+      "node.js",
+      "tailwind css",
+      "rest api",
+      "frontend",
+      "full stack"
+    ],
+    "target_roles": [
+      "Full Stack Developer",
+      "Full Stack Engineer",
+      "Frontend Developer",
+      "Web Developer"
+    ],
+    "priority_score": 7
+  },
+  {
+    "filename": "general_game_programmer.pdf",
+    "title": "General Game & Systems Programmer Resume",
+    "domain": "Game Development",
+    "primary_engine": "Unity",
+    "focus_areas": [
+      "unity",
+      "c#",
+      "c++",
+      "game development",
+      "algorithms",
+      "graphics",
+      "physics",
+      "systems"
+    ],
+    "target_roles": [
+      "Associate Game Programmer",
+      "Junior Game Developer",
+      "Game Developer",
+      "Software Engineer - Games"
+    ],
+    "priority_score": 5
+  }
+]
