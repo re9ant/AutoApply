@@ -51,6 +51,23 @@ def test_add_and_delete_resume_variant():
     res_list = client.get("/api/resumes").json()
     assert any(r["filename"] == "test_mobile_game_dev.pdf" for r in res_list)
 
+    # Edit / Update variant target roles and title
+    edit_variant = dict(new_variant)
+    edit_variant["title"] = "Senior Mobile Game Developer Resume"
+    edit_variant["target_roles"] = ["Lead Mobile Game Developer", "Senior Unity Engineer"]
+    save_resp = client.post("/api/resumes/save", json={
+        "original_filename": "test_mobile_game_dev.pdf",
+        "variant": edit_variant
+    })
+    assert save_resp.status_code == 200
+    assert save_resp.json()["success"] is True
+
+    # Verify updated
+    res_list_edited = client.get("/api/resumes").json()
+    match = next(r for r in res_list_edited if r["filename"] == "test_mobile_game_dev.pdf")
+    assert match["title"] == "Senior Mobile Game Developer Resume"
+    assert "Lead Mobile Game Developer" in match["target_roles"]
+
     # Delete variant
     del_resp = client.delete("/api/resumes/test_mobile_game_dev.pdf")
     assert del_resp.status_code == 200

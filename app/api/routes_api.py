@@ -142,6 +142,30 @@ async def save_resumes(variants: List[ResumeVariant]):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class ResumeSaveRequest(BaseModel):
+    original_filename: Optional[str] = None
+    variant: ResumeVariant
+
+
+@router.post("/resumes/save")
+async def save_resume_variant(req: ResumeSaveRequest):
+    try:
+        variants = resume_selector.get_all_variants()
+        target_name = (req.original_filename or req.variant.filename).lower()
+        updated = [v for v in variants if v.filename.lower() != target_name]
+        updated.append(req.variant)
+
+        index_path = settings.resolve_path(settings.RESUMES_DIR / "index.json")
+        index_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(index_path, "w", encoding="utf-8") as f:
+            json.dump([v.model_dump() for v in updated], f, indent=2)
+
+        resume_selector._load_variants()
+        return {"success": True, "message": f"Resume variant '{req.variant.title}' saved successfully!"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save resume variant: {e}")
+
+
 @router.post("/resumes/add")
 async def add_resume_variant(variant: ResumeVariant):
     try:
