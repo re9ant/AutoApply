@@ -15,12 +15,12 @@
     "use_tls": true
   },
   "discovery": {
-    "selected_presets": [
-      "https://remotegamejobs.com/feed",
-      "https://weworkremotely.com/categories/remote-game-dev-jobs.rss"
-    ],
+    "selected_presets": [],
     "keywords_text": "Unity, Gameplay, Game Programmer, Backend, Software Engineer, C#, Python",
-    "rss_urls": [],
+    "rss_urls": [
+      "https://remotegamejobs.com/feed.rss",
+      "https://fetchrss.com/feed/1wyQhKD1EEAU1wyQh059f6Nx.rss"
+    ],
     "remote_only": false,
     "auto_score_and_sync": true,
     "max_jobs_per_source": 10

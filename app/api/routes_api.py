@@ -497,6 +497,8 @@ async def generate_drafts(req: GenerateDraftsRequest):
                 score = MatchScoreBreakdown(
                     total_score=75,
                     key_strengths=["Relevant experience", "Technical match"],
+                    match_summary=f"Strong fit for {item.job_title} at {item.company}",
+                    recommended_action="AUTO_APPLY",
                     recommended_resume_filename=resume_fn
                 )
 
