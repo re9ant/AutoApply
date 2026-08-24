@@ -397,3 +397,194 @@ async def update_email_settings(req: EmailSettingsRequest):
 async def test_email_settings():
     from app.services.email_service import email_service
     return email_service.test_smtp_connection()
+
+
+# --- 8. Email Draft Generation & Sending ---
+class DraftItem(BaseModel):
+    company: str
+    job_title: str
+    job_url: Optional[str] = None
+    hr_email: Optional[str] = None
+    resume_used: Optional[str] = None
+    notes: Optional[str] = None
+    location: Optional[str] = "Remote"
+
+
+class EditedDraft(BaseModel):
+    company: str
+    job_title: str
+    job_url: Optional[str] = None
+    to_email: str
+    subject: str
+    body_text: str
+    resume_used: str
+    is_dry_run: bool = True
+
+
+class GenerateDraftsRequest(BaseModel):
+    items: List[DraftItem]
+    is_dry_run: bool = True
+
+
+class SendDraftsRequest(BaseModel):
+    drafts: List[EditedDraft]
+    is_dry_run: bool = True
+
+
+@router.post("/applications/generate-drafts")
+async def generate_drafts(req: GenerateDraftsRequest):
+    """Generate email drafts for review — does NOT send anything."""
+    try:
+        from app.services.email_service import email_service
+        from app.services.profile_loader import profile_loader
+        from app.models.job import ExtractedJobDescription, MatchScoreBreakdown
+        from app.services.resume_selector import resume_selector
+
+        profile = profile_loader.load_profile()
+        drafts = []
+        for item in req.items:
+            try:
+                # Build a minimal JD object for email generation
+                jd = ExtractedJobDescription(
+                    title=item.job_title,
+                    company=item.company,
+                    location=item.location or "Remote",
+                    application_url=item.job_url or "",
+                    raw_source=item.notes or f"{item.job_title} at {item.company}"
+                )
+                resume_fn = item.resume_used
+                if not resume_fn:
+                    variants = resume_selector.get_all_variants()
+                    resume_fn = variants[0].filename if variants else "resume.pdf"
+
+                # Score placeholder for email generation
+                score = MatchScoreBreakdown(
+                    total_score=75,
+                    key_strengths=["Relevant experience", "Technical match"],
+                    recommended_resume_filename=resume_fn
+                )
+
+                gen = email_service.generate_application_email(
+                    jd=jd,
+                    profile=profile,
+                    score=score,
+                    resume_filename=resume_fn,
+                    recipient_override=item.hr_email or None,
+                    is_dry_run=req.is_dry_run
+                )
+
+                drafts.append({
+                    "company": item.company,
+                    "job_title": item.job_title,
+                    "job_url": item.job_url or "",
+                    "to_email": gen.recipient_email,
+                    "subject": gen.subject,
+                    "body_text": gen.body_text,
+                    "resume_used": resume_fn,
+                    "attachment_found": gen.attachment_found,
+                    "is_dry_run": req.is_dry_run
+                })
+            except Exception as e:
+                logger.error(f"Draft generation error for {item.company}: {e}")
+                drafts.append({
+                    "company": item.company,
+                    "job_title": item.job_title,
+                    "job_url": item.job_url or "",
+                    "to_email": item.hr_email or "",
+                    "subject": f"Application: {item.job_title}",
+                    "body_text": "",
+                    "resume_used": item.resume_used or "",
+                    "attachment_found": False,
+                    "is_dry_run": req.is_dry_run,
+                    "error": str(e)
+                })
+
+        return {"success": True, "count": len(drafts), "drafts": drafts}
+    except Exception as e:
+        logger.error(f"Generate drafts failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/applications/send-drafts")
+async def send_drafts(req: SendDraftsRequest):
+    """Send user-reviewed and edited email drafts, then log to Sent Emails Excel sheet."""
+    try:
+        from app.services.email_service import email_service, GeneratedEmail
+
+        results = []
+        for draft in req.drafts:
+            try:
+                email_data = GeneratedEmail(
+                    recipient_email=draft.to_email,
+                    subject=draft.subject,
+                    body_text=draft.body_text,
+                    attached_resume_filename=draft.resume_used,
+                    attachment_found=True,
+                    is_dry_run=draft.is_dry_run
+                )
+
+                success, detail = email_service.send_application_email(email_data)
+                status_str = "Dry Run" if draft.is_dry_run else ("Sent" if success else "Failed")
+
+                # Log to Excel Sent Emails sheet
+                excel_tracker.log_sent_email(
+                    company=draft.company,
+                    job_title=draft.job_title,
+                    recipient_email=draft.to_email,
+                    subject=draft.subject,
+                    resume_filename=draft.resume_used,
+                    body_text=draft.body_text,
+                    status=status_str
+                )
+
+                results.append({
+                    "company": draft.company,
+                    "job_title": draft.job_title,
+                    "to_email": draft.to_email,
+                    "success": success,
+                    "status": status_str,
+                    "detail": detail
+                })
+            except Exception as e:
+                logger.error(f"Failed to send draft for {draft.company}: {e}")
+                results.append({
+                    "company": draft.company,
+                    "job_title": draft.job_title,
+                    "to_email": draft.to_email,
+                    "success": False,
+                    "status": "Failed",
+                    "detail": str(e)
+                })
+
+        return {"success": True, "count": len(results), "results": results}
+    except Exception as e:
+        logger.error(f"Send drafts failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/discovery/rescan-email")
+async def rescan_email(company: str, job_url: str = "", description_text: str = ""):
+    """Re-scan a company website to find HR email. Called by 'Try Again' button on job cards."""
+    try:
+        from app.services.email_finder import email_finder
+        found = await email_finder.find_email(
+            job_url=job_url or None,
+            company=company,
+            description_text=description_text or None
+        )
+        return {
+            "email": found,
+            "status": "FOUND" if found else "NOT_FOUND"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/emails/sent")
+async def get_sent_emails():
+    """Return all rows from the Sent Emails sheet in tracker.xlsx."""
+    try:
+        sent = excel_tracker.get_sent_emails()
+        return {"total": len(sent), "emails": sent}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

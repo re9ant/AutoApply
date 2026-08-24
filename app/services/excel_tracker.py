@@ -211,4 +211,87 @@ class ExcelTracker:
         return applications
 
 
+    # ---- Sent Emails Sheet ----
+
+    SENT_EMAIL_HEADERS = [
+        "Sent At", "Company", "Job Title", "Recipient Email",
+        "Subject", "Resume Attached", "Status", "Body Preview"
+    ]
+
+    def _ensure_sent_emails_sheet(self, wb: openpyxl.Workbook) -> openpyxl.worksheet.worksheet.Worksheet:
+        """Get or create the Sent Emails worksheet with styled headers."""
+        if "Sent Emails" in wb.sheetnames:
+            return wb["Sent Emails"]
+
+        ws = wb.create_sheet("Sent Emails")
+        header_fill = PatternFill(start_color="1B4332", end_color="1B4332", fill_type="solid")
+        header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+        border_side = Side(style="thin", color="D9D9D9")
+        border = Border(left=border_side, right=border_side, top=border_side, bottom=border_side)
+        col_widths = [20, 22, 30, 35, 45, 30, 12, 60]
+
+        for col_idx, header in enumerate(self.SENT_EMAIL_HEADERS, start=1):
+            cell = ws.cell(row=1, column=col_idx, value=header)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            cell.border = border
+            ws.column_dimensions[get_column_letter(col_idx)].width = col_widths[col_idx - 1]
+
+        ws.row_dimensions[1].height = 26
+        ws.freeze_panes = "A2"
+        return ws
+
+    def log_sent_email(
+        self,
+        company: str,
+        job_title: str,
+        recipient_email: str,
+        subject: str,
+        resume_filename: str,
+        body_text: str,
+        status: str = "Sent"
+    ) -> int:
+        """Append a row to the Sent Emails sheet. Returns the row number written."""
+        self._create_backup()
+        wb = openpyxl.load_workbook(self.file_path)
+        ws = self._ensure_sent_emails_sheet(wb)
+
+        row = ws.max_row + 1
+        values = [
+            datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M"),
+            company,
+            job_title,
+            recipient_email,
+            subject,
+            resume_filename,
+            status,
+            (body_text[:200] + "...") if body_text and len(body_text) > 200 else (body_text or "")
+        ]
+        for col_idx, val in enumerate(values, start=1):
+            cell = ws.cell(row=row, column=col_idx, value=val)
+            cell.alignment = Alignment(vertical="center", wrap_text=(col_idx == 8))
+
+        wb.save(self.file_path)
+        logger.info(f"Logged sent email to '{recipient_email}' for {company} — {job_title} at row {row}")
+        return row
+
+    def get_sent_emails(self) -> List[Dict[str, Any]]:
+        """Read and return all rows from the Sent Emails sheet."""
+        wb = openpyxl.load_workbook(self.file_path, data_only=True)
+        if "Sent Emails" not in wb.sheetnames:
+            return []
+        ws = wb["Sent Emails"]
+        sent = []
+        headers = [ws.cell(row=1, column=c).value for c in range(1, ws.max_column + 1)]
+        for r in range(2, ws.max_row + 1):
+            row_data = {}
+            for c_idx, header in enumerate(headers, start=1):
+                if header:
+                    row_data[str(header).lower().replace(" ", "_")] = ws.cell(row=r, column=c_idx).value
+            if any(row_data.values()):
+                sent.append(row_data)
+        return sent
+
+
 excel_tracker = ExcelTracker()

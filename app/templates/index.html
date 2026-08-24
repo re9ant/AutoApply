@@ -54,7 +54,7 @@
           <i class="fa-solid fa-file-pdf"></i>
           <span>Resumes</span>
         </button>
-        <button @click="activeTab = 'tracker'; loadApplications()" :class="activeTab === 'tracker' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center space-x-2">
+        <button @click="activeTab = 'tracker'; loadApplications(); loadSentEmails()" :class="activeTab === 'tracker' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center space-x-2">
           <i class="fa-solid fa-table"></i>
           <span>Excel Tracker</span>
         </button>
@@ -138,6 +138,136 @@
     </div>
 
     <!-- ================================================================= -->
+    <!-- EMAIL DRAFT REVIEW & EDIT MODAL -->
+    <!-- ================================================================= -->
+    <div x-cloak x-show="showDraftModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div @click.away="showDraftModal = false" class="glass-card bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col max-w-4xl w-full max-h-[92vh]">
+
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-slate-800 px-6 py-4 shrink-0">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+              <i class="fa-solid fa-envelope-open-text text-emerald-400"></i>
+              <span>Email Draft Review & Edit</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Review and edit each email before sending. All fields are editable.</p>
+          </div>
+          <div class="flex items-center space-x-3">
+            <label class="flex items-center space-x-1.5 text-xs text-slate-300 cursor-pointer">
+              <input type="checkbox" x-model="applyPreferences.is_dry_run" class="rounded border-slate-700 bg-slate-900 text-amber-500">
+              <span class="font-semibold" :class="applyPreferences.is_dry_run ? 'text-amber-400' : 'text-emerald-400'" x-text="applyPreferences.is_dry_run ? '🔒 Dry Run (No Send)' : '🚀 Live Mode'"></span>
+            </label>
+            <button @click="showDraftModal = false" class="text-slate-400 hover:text-white p-1">
+              <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Draft Cards (scrollable) -->
+        <div class="flex-1 overflow-y-auto px-6 py-4 space-y-5">
+          <template x-for="(draft, idx) in emailDrafts" :key="idx">
+            <div class="bg-slate-950/70 border rounded-xl p-5 space-y-4" :class="draft.approved ? 'border-emerald-500/50' : 'border-slate-800'">
+
+              <!-- Draft Header -->
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="text-xs font-mono text-indigo-300 font-semibold" x-text="draft.company"></div>
+                  <div class="text-sm font-bold text-white mt-0.5" x-text="draft.job_title"></div>
+                </div>
+                <label class="flex items-center space-x-2 cursor-pointer shrink-0">
+                  <input type="checkbox" x-model="draft.approved" class="rounded border-slate-700 bg-slate-950 text-emerald-500 w-4 h-4">
+                  <span class="text-xs font-semibold" :class="draft.approved ? 'text-emerald-400' : 'text-slate-500'" x-text="draft.approved ? '✓ Approved' : 'Approve'"></span>
+                </label>
+              </div>
+
+              <!-- Editable Fields -->
+              <div class="grid grid-cols-2 gap-3">
+                <!-- To Email -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                    <i class="fa-solid fa-at text-emerald-400 mr-1"></i>To (Recipient Email)
+                  </label>
+                  <input type="email" x-model="draft.to_email" placeholder="hr@company.com"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-emerald-300 focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <!-- Resume -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                    <i class="fa-solid fa-paperclip text-indigo-400 mr-1"></i>Attached Resume
+                  </label>
+                  <div class="flex items-center space-x-2">
+                    <select x-model="draft.resume_used" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-xs font-mono text-indigo-300 focus:outline-none focus:border-indigo-500">
+                      <template x-for="rv in resumeVariants" :key="rv.filename">
+                        <option :value="rv.filename" x-text="rv.title" :selected="rv.filename === draft.resume_used"></option>
+                      </template>
+                    </select>
+                    <a x-show="draft.resume_used" :href="'/api/resumes/view/' + encodeURIComponent(draft.resume_used)" target="_blank" class="text-slate-400 hover:text-indigo-300 p-1" title="View PDF">
+                      <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Subject Line -->
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                  <i class="fa-solid fa-heading text-slate-400 mr-1"></i>Subject Line
+                </label>
+                <input type="text" x-model="draft.subject" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+              </div>
+
+              <!-- Email Body -->
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                  <i class="fa-solid fa-align-left text-slate-400 mr-1"></i>Email Body
+                </label>
+                <textarea x-model="draft.body_text" rows="9"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 resize-y"></textarea>
+              </div>
+
+              <!-- Draft error notice -->
+              <div x-show="draft.error" class="text-xs text-rose-400 bg-rose-950/30 border border-rose-500/30 rounded-lg px-3 py-2">
+                <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                <span x-text="'Draft generation warning: ' + draft.error"></span>
+              </div>
+            </div>
+          </template>
+
+          <!-- Empty state -->
+          <div x-show="emailDrafts.length === 0" class="text-center text-slate-500 py-12 text-sm">
+            <i class="fa-solid fa-envelope-open text-2xl mb-3"></i>
+            <p>No drafts generated. Select jobs and click "Review & Send Emails".</p>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="border-t border-slate-800 px-6 py-4 flex items-center justify-between gap-3 shrink-0 bg-slate-900/50">
+          <div class="text-xs text-slate-400">
+            <span class="font-semibold text-white" x-text="emailDrafts.filter(d => d.approved).length"></span>
+            <span> of </span>
+            <span class="font-semibold text-white" x-text="emailDrafts.length"></span>
+            <span> drafts approved</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button @click="emailDrafts.forEach(d => d.approved = true)" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">
+              Approve All
+            </button>
+            <button @click="showDraftModal = false" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">
+              Cancel
+            </button>
+            <button @click="sendApprovedDrafts()" :disabled="applying || emailDrafts.filter(d => d.approved).length === 0"
+              class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 disabled:opacity-50 text-white font-bold text-xs shadow-md flex items-center space-x-2">
+              <i x-show="applying" class="fa-solid fa-spinner fa-spin"></i>
+              <i x-show="!applying" class="fa-solid fa-paper-plane"></i>
+              <span x-text="applyPreferences.is_dry_run ? 'Dry Run Preview' : 'Send ' + emailDrafts.filter(d => d.approved).length + ' Emails'"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
     <!-- TAB 0: JOB SCRAPER & DISCOVERY ENGINE -->
     <!-- ================================================================= -->
     <section x-show="activeTab === 'discovery'" class="space-y-6">
@@ -154,44 +284,43 @@
               <span class="text-xs font-mono text-slate-400">ATS & Feeds</span>
             </div>
 
-            <!-- Studio / Tech Presets -->
+            <!-- RSS Feed Presets -->
             <div>
-              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Select Target Sites & ATS Boards</label>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                <i class="fa-solid fa-rss text-orange-400 mr-1"></i>Select RSS Feed Sources
+              </label>
               <div class="grid grid-cols-2 gap-2">
                 <template x-for="p in presets" :key="p.target">
                   <label class="flex items-center space-x-2 p-2 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-900 cursor-pointer text-xs">
-                    <input type="checkbox" :value="p.target" x-model="discoveryForm.selected_presets" class="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500">
+                    <input type="checkbox" :value="p.target" x-model="discoveryForm.selected_presets" class="rounded border-slate-700 bg-slate-950 text-orange-500 focus:ring-orange-500">
                     <div>
                       <div class="font-semibold text-slate-200" x-text="p.name"></div>
-                      <div class="text-[10px] text-slate-500 font-mono" x-text="p.type"></div>
+                      <div class="text-[10px] text-orange-400/70 font-mono" x-text="p.category || 'RSS'"></div>
                     </div>
                   </label>
                 </template>
               </div>
             </div>
 
-            <!-- Custom Target Input -->
+            <!-- Custom RSS Feed URL Input -->
             <div>
-              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Add Custom Career URL or ATS Handle</label>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                <i class="fa-solid fa-plus text-slate-500 mr-1"></i>Add Custom RSS Feed URL
+              </label>
               <div class="flex space-x-2">
-                <select x-model="newCustomTarget.type" class="bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-2 text-xs text-slate-200">
-                  <option value="greenhouse">Greenhouse</option>
-                  <option value="lever">Lever</option>
-                  <option value="ashby">Ashby</option>
-                  <option value="web">Web Page</option>
-                </select>
-                <input type="text" x-model="newCustomTarget.target" placeholder="e.g. companyhandle or https://career.url" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
-                <button @click="addCustomTarget()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold">
-                  + Add
+                <input type="url" x-model="newRssUrl" placeholder="https://example.com/jobs/feed.rss" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-orange-500 focus:outline-none">
+                <button @click="addRssUrl()" class="px-3 py-2 bg-orange-600/80 hover:bg-orange-600 text-white rounded-xl text-xs font-bold flex items-center space-x-1">
+                  <i class="fa-solid fa-rss text-[10px]"></i>
+                  <span>Add</span>
                 </button>
               </div>
 
-              <!-- Custom targets list -->
-              <div class="mt-2 space-y-1" x-show="discoveryForm.custom_targets.length > 0">
-                <template x-for="(ct, idx) in discoveryForm.custom_targets" :key="idx">
+              <!-- Custom RSS URLs list -->
+              <div class="mt-2 space-y-1" x-show="discoveryForm.rss_urls && discoveryForm.rss_urls.length > 0">
+                <template x-for="(url, idx) in discoveryForm.rss_urls" :key="idx">
                   <div class="flex items-center justify-between bg-slate-900 px-3 py-1.5 rounded-lg text-xs">
-                    <span class="font-mono text-indigo-300" x-text="ct.type + ': ' + ct.target"></span>
-                    <button @click="discoveryForm.custom_targets.splice(idx, 1)" class="text-rose-400 hover:text-rose-300">
+                    <span class="font-mono text-orange-300 truncate max-w-[200px]" x-text="url"></span>
+                    <button @click="discoveryForm.rss_urls.splice(idx, 1)" class="text-rose-400 hover:text-rose-300 ml-2">
                       <i class="fa-solid fa-xmark"></i>
                     </button>
                   </div>
@@ -272,10 +401,10 @@
                 <input type="checkbox" x-model="applyPreferences.is_dry_run" class="rounded border-slate-700 bg-slate-900 text-indigo-600">
                 <span>Dry Run Mode</span>
               </label>
-              <button @click="applySelectedDiscovered()" :disabled="applying || getSelectedDiscoveredCount() === 0" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 disabled:opacity-50 text-white font-bold text-xs shadow-md flex items-center space-x-1.5">
-                <i x-show="applying" class="fa-solid fa-spinner fa-spin"></i>
-                <i x-show="!applying" class="fa-solid fa-paper-plane"></i>
-                <span>Apply to Selected</span>
+              <button @click="openDraftModal('discovery')" :disabled="generatingDrafts || getSelectedDiscoveredCount() === 0" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 disabled:opacity-50 text-white font-bold text-xs shadow-md flex items-center space-x-1.5">
+                <i x-show="generatingDrafts" class="fa-solid fa-spinner fa-spin"></i>
+                <i x-show="!generatingDrafts" class="fa-solid fa-envelope-open-text"></i>
+                <span x-text="generatingDrafts ? 'Generating...' : 'Review & Send Emails'"></span>
               </button>
               <button x-cloak x-show="applying" @click="stopApplying()" title="Stop Application Immediately" class="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md shadow-rose-600/30 flex items-center space-x-1.5 animate-pulse">
                 <i class="fa-solid fa-circle-stop"></i>
@@ -320,6 +449,35 @@
                 </div>
 
                 <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/60 text-xs">
+                  <!-- HR Email Row -->
+                  <div class="w-full flex items-center space-x-2 pb-1.5 border-b border-slate-800/40">
+                    <i class="fa-solid fa-envelope text-emerald-400 text-[11px] shrink-0"></i>
+                    <span class="text-slate-400 text-[11px] font-semibold shrink-0">HR Email:</span>
+                    <input
+                      type="email"
+                      x-model="res.hr_email"
+                      :placeholder="res.email_status === 'FOUND' ? '' : 'Enter HR email manually...'"
+                      class="flex-1 bg-slate-950/80 border rounded-lg px-2 py-1 text-[11px] font-mono focus:outline-none"
+                      :class="res.email_status === 'FOUND' ? 'border-emerald-500/40 text-emerald-300' : 'border-slate-700 text-slate-300 placeholder-slate-600'"
+                    >
+                    <span
+                      x-show="res.email_status === 'FOUND'"
+                      class="text-[10px] text-emerald-400 font-semibold shrink-0 flex items-center space-x-0.5"
+                      title="Email found automatically">
+                      <i class="fa-solid fa-circle-check"></i>
+                    </span>
+                    <button
+                      @click="rescanEmail(res)"
+                      :disabled="res.rescanningEmail"
+                      title="Re-scan company site for HR email"
+                      class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-semibold flex items-center space-x-1 shrink-0 disabled:opacity-50">
+                      <i x-show="res.rescanningEmail" class="fa-solid fa-spinner fa-spin text-[10px]"></i>
+                      <i x-show="!res.rescanningEmail" class="fa-solid fa-rotate text-[10px]"></i>
+                      <span>Re-scan</span>
+                    </button>
+                  </div>
+
+                  <!-- Resume + View Link -->
                   <div class="flex items-center space-x-1.5">
                     <span class="text-slate-400 text-[11px] font-semibold flex items-center space-x-1">
                       <i class="fa-solid fa-paperclip text-indigo-400 text-[10px]"></i>
@@ -335,7 +493,7 @@
                     </a>
                   </div>
                   <a :href="res.discovered_job.url" target="_blank" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center space-x-1 ml-auto">
-                    <span>View Application Link</span>
+                    <span>View Job</span>
                     <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
                   </a>
                 </div>
@@ -799,10 +957,10 @@
               <input type="checkbox" x-model="applyPreferences.is_dry_run" class="rounded border-slate-700 bg-slate-900 text-indigo-600">
               <span>Dry Run</span>
             </label>
-            <button @click="applySelectedTracker()" :disabled="applying || getSelectedTrackerCount() === 0" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 disabled:opacity-50 text-white font-bold text-xs shadow-md flex items-center space-x-1.5">
-              <i x-show="applying" class="fa-solid fa-spinner fa-spin"></i>
-              <i x-show="!applying" class="fa-solid fa-paper-plane"></i>
-              <span>Apply to Selected</span>
+            <button @click="openDraftModal('tracker')" :disabled="generatingDrafts || getSelectedTrackerCount() === 0" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 disabled:opacity-50 text-white font-bold text-xs shadow-md flex items-center space-x-1.5">
+              <i x-show="generatingDrafts" class="fa-solid fa-spinner fa-spin"></i>
+              <i x-show="!generatingDrafts" class="fa-solid fa-envelope-open-text"></i>
+              <span x-text="generatingDrafts ? 'Generating...' : 'Review & Send Emails'"></span>
             </button>
             <button x-cloak x-show="applying" @click="stopApplying()" title="Stop Application Immediately" class="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md shadow-rose-600/30 flex items-center space-x-1.5 animate-pulse">
               <i class="fa-solid fa-circle-stop"></i>
@@ -860,6 +1018,59 @@
                   <td class="py-3 px-3 text-slate-400 max-w-xs truncate" x-text="app.submission_details || app.notes"></td>
                 </tr>
               </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sent Emails Section -->
+      <div class="glass-card rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center space-x-2">
+              <i class="fa-solid fa-paper-plane text-emerald-400"></i>
+              <span>Sent Emails Log</span>
+            </h2>
+            <p class="text-xs text-slate-400">All emails sent (or dry-run previewed) via AutoApply — saved to tracker.xlsx / Sent Emails sheet.</p>
+          </div>
+          <button @click="loadSentEmails()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center space-x-1.5">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            <span>Reload</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+              <tr>
+                <th class="py-3 px-3">Sent At</th>
+                <th class="py-3 px-3">Company</th>
+                <th class="py-3 px-3">Job Title</th>
+                <th class="py-3 px-3">Recipient Email</th>
+                <th class="py-3 px-3">Subject</th>
+                <th class="py-3 px-3">Resume</th>
+                <th class="py-3 px-3">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">
+              <template x-for="(email, idx) in sentEmails" :key="idx">
+                <tr class="hover:bg-slate-900/40 transition-colors">
+                  <td class="py-2 px-3 font-mono text-slate-500 text-[11px]" x-text="email.sent_at || '—'"></td>
+                  <td class="py-2 px-3 font-bold text-white" x-text="email.company || '—'"></td>
+                  <td class="py-2 px-3 text-slate-300" x-text="email.job_title || '—'"></td>
+                  <td class="py-2 px-3 font-mono text-emerald-300 text-[11px]" x-text="email.recipient_email || '—'"></td>
+                  <td class="py-2 px-3 text-slate-400 max-w-xs truncate" x-text="email.subject || '—'"></td>
+                  <td class="py-2 px-3 font-mono text-indigo-300 text-[11px]" x-text="email.resume_attached || '—'"></td>
+                  <td class="py-2 px-3">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase"
+                      :class="email.status === 'Sent' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : (email.status === 'Dry Run' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30')"
+                      x-text="email.status || '—'"></span>
+                  </td>
+                </tr>
+              </template>
+              <tr x-show="sentEmails.length === 0">
+                <td colspan="7" class="py-8 text-center text-slate-500 text-xs">No emails sent yet. Use "Review & Send Emails" to send applications.</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -998,18 +1209,26 @@
         analyzing: false,
         scraping: false,
         applying: false,
+        generatingDrafts: false,
         testingConnection: false,
         testingEmail: false,
         testResult: null,
         emailTestResult: null,
         showBatchApplyModal: false,
         batchApplyResults: [],
+        showDraftModal: false,
+        emailDrafts: [],
+        sentEmails: [],
         toast: { show: false, message: '', type: 'success' },
 
         presets: [],
         discoveryForm: {
-          selected_presets: ['phoenixlabs', 'riotgames', 'supercell', 'roblox'],
+          selected_presets: [
+            'https://remotegamejobs.com/feed',
+            'https://weworkremotely.com/categories/remote-game-dev-jobs.rss'
+          ],
           custom_targets: [],
+          rss_urls: [],
           keywords_text: 'Unity, Gameplay, Game Programmer, Backend, Software Engineer, C#, Python',
           keywords: ['Unity', 'Gameplay', 'Game Programmer', 'Backend', 'Software Engineer', 'C#', 'Python'],
           locations: [],
@@ -1017,7 +1236,7 @@
           auto_score_and_sync: true,
           max_jobs_per_source: 10
         },
-        newCustomTarget: { type: 'greenhouse', target: '' },
+        newRssUrl: '',
         discoveryResponse: null,
         discoveryAbortController: null,
         applyAbortController: null,
@@ -1096,6 +1315,7 @@
           await this.loadResumes();
           await this.loadApplications();
           await this.loadProfile();
+          await this.loadSentEmails();
         },
 
         // --- Batch Selection Helpers ---
@@ -1319,10 +1539,130 @@
           }
         },
 
-        addCustomTarget() {
-          if (!this.newCustomTarget.target.trim()) return;
-          this.discoveryForm.custom_targets.push({ ...this.newCustomTarget });
-          this.newCustomTarget.target = '';
+        addRssUrl() {
+          const url = this.newRssUrl.trim();
+          if (!url) return;
+          if (!this.discoveryForm.rss_urls) this.discoveryForm.rss_urls = [];
+          this.discoveryForm.rss_urls.push(url);
+          this.newRssUrl = '';
+        },
+
+        async rescanEmail(res) {
+          res.rescanningEmail = true;
+          try {
+            const params = new URLSearchParams({
+              company: res.discovered_job.company,
+              job_url: res.discovered_job.url || '',
+              description_text: (res.discovered_job.description_text || '').substring(0, 500)
+            });
+            const resp = await fetch('/api/discovery/rescan-email?' + params.toString(), { method: 'POST' });
+            if (!resp.ok) throw new Error(await resp.text());
+            const data = await resp.json();
+            if (data.email) {
+              res.hr_email = data.email;
+              res.email_status = 'FOUND';
+              this.showToast(`Found HR email: ${data.email}`);
+            } else {
+              res.email_status = 'NOT_FOUND';
+              this.showToast('No HR email found. Please enter manually.', 'error');
+            }
+          } catch (e) {
+            this.showToast('Re-scan failed: ' + e.message, 'error');
+          } finally {
+            res.rescanningEmail = false;
+          }
+        },
+
+        async openDraftModal(source) {
+          let items = [];
+          if (source === 'discovery') {
+            items = (this.discoveryResponse?.results || [])
+              .filter(r => r.selected)
+              .map(r => ({
+                company: r.discovered_job.company,
+                job_title: r.discovered_job.title,
+                job_url: r.discovered_job.url,
+                hr_email: r.hr_email || '',
+                resume_used: r.recommended_resume || (this.resumeVariants[0]?.filename || ''),
+                location: r.discovered_job.location
+              }));
+          } else if (source === 'tracker') {
+            items = this.applications
+              .filter(a => a.selected)
+              .map(a => ({
+                company: a.company,
+                job_title: a.job_title,
+                job_url: a.job_url,
+                hr_email: '',
+                resume_used: a.resume_used || (this.resumeVariants[0]?.filename || ''),
+                location: a.location
+              }));
+          }
+
+          if (items.length === 0) return;
+          this.generatingDrafts = true;
+          try {
+            const res = await fetch('/api/applications/generate-drafts', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ items, is_dry_run: this.applyPreferences.is_dry_run })
+            });
+            if (!res.ok) throw new Error(await res.text());
+            const data = await res.json();
+            this.emailDrafts = data.drafts.map(d => ({ ...d, approved: false }));
+            this.showDraftModal = true;
+            this.showToast(`Generated ${data.count} email drafts for review.`);
+          } catch (e) {
+            this.showToast('Failed to generate drafts: ' + e.message, 'error');
+          } finally {
+            this.generatingDrafts = false;
+          }
+        },
+
+        async sendApprovedDrafts() {
+          const approved = this.emailDrafts.filter(d => d.approved);
+          if (approved.length === 0) return;
+          this.applying = true;
+          try {
+            const res = await fetch('/api/applications/send-drafts', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                drafts: approved.map(d => ({
+                  company: d.company,
+                  job_title: d.job_title,
+                  job_url: d.job_url || '',
+                  to_email: d.to_email,
+                  subject: d.subject,
+                  body_text: d.body_text,
+                  resume_used: d.resume_used,
+                  is_dry_run: this.applyPreferences.is_dry_run
+                })),
+                is_dry_run: this.applyPreferences.is_dry_run
+              })
+            });
+            if (!res.ok) throw new Error(await res.text());
+            const data = await res.json();
+            const sentCount = data.results.filter(r => r.success).length;
+            this.showDraftModal = false;
+            this.showToast(`${sentCount}/${data.count} emails ${this.applyPreferences.is_dry_run ? 'dry-run previewed' : 'sent'} successfully!`);
+            await this.loadSentEmails();
+            await this.loadApplications();
+          } catch (e) {
+            this.showToast('Send error: ' + e.message, 'error');
+          } finally {
+            this.applying = false;
+          }
+        },
+
+        async loadSentEmails() {
+          try {
+            const res = await fetch('/api/emails/sent');
+            const data = await res.json();
+            this.sentEmails = data.emails || [];
+          } catch (e) {
+            console.error('Error loading sent emails:', e);
+          }
         },
 
         stopDiscovery() {
@@ -1355,10 +1695,15 @@
             if (!res.ok) throw new Error(await res.text());
             const data = await res.json();
             if (data.results) {
-              data.results.forEach(r => r.selected = false);
+              data.results.forEach(r => {
+                r.selected = false;
+                r.rescanningEmail = false;
+                // hr_email and email_status come from backend
+              });
             }
             this.discoveryResponse = data;
-            this.showToast(`Scraped ${data.total_discovered} jobs (${data.new_jobs_processed} new matched & synced)!`);
+            const emailsFound = data.results.filter(r => r.email_status === 'FOUND').length;
+            this.showToast(`Scraped ${data.total_discovered} jobs — ${data.new_jobs_processed} new, ${emailsFound} HR emails found!`);
             await this.loadApplications();
           } catch (e) {
             if (e.name === 'AbortError') {

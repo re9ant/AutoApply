@@ -31,6 +31,23 @@ async def test_discovery_presets_available():
     presets = service.get_supported_presets()
 
     assert len(presets) >= 5
-    assert any(p["target"] == "riotgames" for p in presets)
-    assert any(p["target"] == "supercell" for p in presets)
-    assert any(p["target"] == "roblox" for p in presets)
+    assert any("remotegamejobs" in p["target"] for p in presets)
+    assert any("weworkremotely" in p["target"] for p in presets)
+
+
+@pytest.mark.asyncio
+async def test_rss_feed_scraper_and_email_finder():
+    from app.scrapers.rss_scraper import RSSFeedScraper
+    from app.services.email_finder import CompanyEmailFinder
+
+    scraper = RSSFeedScraper()
+    assert scraper.source_name == "RSS Feed"
+
+    email_finder = CompanyEmailFinder()
+    email = await email_finder.find_email(
+        job_url="https://phoenixinteractive.com/careers/unity-programmer",
+        company="Phoenix Interactive",
+        description_text="Contact our hiring team at careers@phoenixinteractive.com for details."
+    )
+    assert email == "careers@phoenixinteractive.com"
+

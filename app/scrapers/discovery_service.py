@@ -10,31 +10,44 @@ from app.scrapers.base import BaseJobScraper, DiscoveredJob, ScrapeFilter
 from app.scrapers.game_jobs import GameJobsScraper
 from app.scrapers.greenhouse import GreenhouseScraper
 from app.scrapers.lever import LeverScraper
+from app.scrapers.rss_scraper import RSSFeedScraper
 from app.scrapers.web_page import WebPageScraper
 from app.services.application_service import application_service, ApplicationService
+from app.services.email_finder import email_finder
 from app.services.excel_tracker import excel_tracker, ExcelTracker
 
 logger = logging.getLogger(__name__)
 
 
-# Preset top game studios and tech companies with public ATS boards
-POPULAR_STUDIO_PRESETS = [
-    {"name": "Phoenix Labs", "type": "greenhouse", "target": "phoenixlabs", "category": "Game Dev"},
-    {"name": "Riot Games", "type": "greenhouse", "target": "riotgames", "category": "Game Dev"},
-    {"name": "Supercell", "type": "greenhouse", "target": "supercell", "category": "Game Dev"},
-    {"name": "Respawn / EA", "type": "greenhouse", "target": "respawn", "category": "Game Dev"},
-    {"name": "Innersloth", "type": "ashby", "target": "innersloth", "category": "Game Dev"},
-    {"name": "Roblox", "type": "lever", "target": "roblox", "category": "Game & Tech"},
-    {"name": "Scale AI", "type": "ashby", "target": "scaleai", "category": "AI / Tech"},
-    {"name": "RemoteGameJobs Feed", "type": "feed", "target": "https://remotegamejobs.com/feed", "category": "Game Dev"},
+# RSS feed presets — these are the primary discovery sources
+RSS_FEED_PRESETS = [
+    {"name": "Remote Game Jobs",     "type": "rss", "target": "https://remotegamejobs.com/feed",                                      "category": "Game Dev"},
+    {"name": "WeWorkRemotely Games",  "type": "rss", "target": "https://weworkremotely.com/categories/remote-game-dev-jobs.rss",      "category": "Game Dev"},
+    {"name": "WeWorkRemotely Prog",   "type": "rss", "target": "https://weworkremotely.com/categories/remote-programming-jobs.rss",   "category": "Programming"},
+    {"name": "Remotive (Dev)",        "type": "rss", "target": "https://remotive.com/remote-jobs/feed/software-dev",                  "category": "Tech"},
+    {"name": "Jobicy (Remote)",       "type": "rss", "target": "https://jobicy.com/?feed=job_feed",                                   "category": "Tech"},
+    {"name": "RemoteOK",              "type": "rss", "target": "https://remoteok.com/remote-jobs.rss",                               "category": "Tech"},
+    {"name": "Hitmarker Game Jobs",   "type": "rss", "target": "https://hitmarker.net/rss",                                          "category": "Game Dev"},
 ]
+
+# Keep ATS presets available (not default-selected but still usable)
+POPULAR_STUDIO_PRESETS = RSS_FEED_PRESETS
 
 
 class DiscoveryRequest(BaseModel):
-    selected_presets: List[str] = Field(default_factory=lambda: ["phoenixlabs", "riotgames", "supercell", "roblox"])
+    selected_presets: List[str] = Field(
+        default_factory=lambda: [
+            "https://remotegamejobs.com/feed",
+            "https://weworkremotely.com/categories/remote-game-dev-jobs.rss",
+        ]
+    )
     custom_targets: List[Dict[str, str]] = Field(
         default_factory=list,
-        description="List of custom dicts: [{'type': 'greenhouse'|'lever'|'ashby'|'web', 'target': 'url_or_handle'}]"
+        description="List of custom dicts: [{'type': 'rss', 'target': 'https://example.com/feed.rss'}]"
+    )
+    rss_urls: List[str] = Field(
+        default_factory=list,
+        description="Additional custom RSS feed URLs to scrape"
     )
     keywords: List[str] = Field(
         default_factory=lambda: ["Unity", "Gameplay", "Game Programmer", "Backend", "Software Engineer", "C#", "Python"]
@@ -51,6 +64,8 @@ class DiscoveredJobResult(BaseModel):
     decision_status: Optional[str] = None
     recommended_resume: Optional[str] = None
     already_tracked: bool = False
+    hr_email: Optional[str] = None
+    email_status: str = "PENDING"  # FOUND | NOT_FOUND | PENDING
 
 
 class DiscoveryResponse(BaseModel):
@@ -61,24 +76,27 @@ class DiscoveryResponse(BaseModel):
 
 
 class JobDiscoveryService:
-    """Orchestrates multi-source scraping, deduplication, batch JD analysis, scoring, and Excel sync."""
+    """Orchestrates RSS feed scraping, deduplication, batch JD analysis, scoring, email finding, and Excel sync."""
 
     def __init__(self, app_service: Optional[ApplicationService] = None, tracker: Optional[ExcelTracker] = None):
         self.app_service = app_service or application_service
         self.tracker = tracker or excel_tracker
+        self.rss_scraper = RSSFeedScraper()
+        # Keep ATS scrapers available for custom_targets if user specifies them
         self.scrapers: Dict[str, BaseJobScraper] = {
+            "rss": self.rss_scraper,
+            "feed": self.rss_scraper,  # backward compat alias
             "greenhouse": GreenhouseScraper(),
             "lever": LeverScraper(),
             "ashby": AshbyScraper(),
-            "feed": GameJobsScraper(),
             "web": WebPageScraper(),
         }
 
     def get_supported_presets(self) -> List[Dict[str, Any]]:
-        return POPULAR_STUDIO_PRESETS
+        return RSS_FEED_PRESETS
 
     async def run_discovery(self, request: DiscoveryRequest) -> DiscoveryResponse:
-        """Run scraping across selected sources, match each job, and sync to Excel."""
+        """Run RSS feed scraping, match each job, find HR emails, and sync to Excel."""
         filters = ScrapeFilter(
             keywords=request.keywords,
             locations=request.locations,
@@ -88,26 +106,29 @@ class JobDiscoveryService:
 
         tasks = []
 
-        # 1. Add preset targets
-        for preset in POPULAR_STUDIO_PRESETS:
+        # 1. Add selected RSS preset feeds
+        for preset in RSS_FEED_PRESETS:
             if preset["target"] in request.selected_presets:
-                scraper = self.scrapers.get(preset["type"])
-                if scraper:
-                    tasks.append(scraper.scrape(preset["target"], filters))
+                tasks.append(self.rss_scraper.scrape(preset["target"], filters))
 
-        # 2. Add custom targets
+        # 2. Add custom RSS URL targets
+        for rss_url in request.rss_urls:
+            if rss_url.strip():
+                tasks.append(self.rss_scraper.scrape(rss_url.strip(), filters))
+
+        # 3. Add custom_targets (backward compat — supports rss, greenhouse, lever, etc.)
         for custom in request.custom_targets:
-            target_type = custom.get("type", "web").lower()
+            target_type = custom.get("type", "rss").lower()
             target_val = custom.get("target", "").strip()
             if target_val:
-                scraper = self.scrapers.get(target_type) or self.scrapers["web"]
+                scraper = self.scrapers.get(target_type) or self.rss_scraper
                 tasks.append(scraper.scrape(target_val, filters))
 
         if not tasks:
-            # Fallback default scrape
-            tasks.append(self.scrapers["greenhouse"].scrape("phoenixlabs", filters))
+            # Default: scrape RemoteGameJobs if nothing selected
+            tasks.append(self.rss_scraper.scrape("https://remotegamejobs.com/feed", filters))
 
-        # Run scrapers concurrently
+        # Run all feed scrapers concurrently
         scrape_results = await asyncio.gather(*tasks, return_exceptions=True)
 
         all_discovered: List[DiscoveredJob] = []
@@ -133,22 +154,38 @@ class JobDiscoveryService:
         new_processed_count = 0
         duplicates_count = 0
 
+        # Find HR emails concurrently for all new non-duplicate jobs
+        email_tasks = []
+        non_dup_jobs = []
+
         for disc in all_discovered:
             clean_url = disc.url.strip().lower()
             combo = f"{disc.company.strip().lower()}-{disc.title.strip().lower()}"
-
             is_duplicate = (clean_url in existing_urls) or (combo in existing_combos)
 
             if is_duplicate:
                 duplicates_count += 1
-                results.append(
-                    DiscoveredJobResult(
-                        discovered_job=disc,
-                        already_tracked=True,
-                        decision_status="ALREADY_TRACKED"
+                results.append(DiscoveredJobResult(
+                    discovered_job=disc,
+                    already_tracked=True,
+                    decision_status="ALREADY_TRACKED"
+                ))
+            else:
+                non_dup_jobs.append(disc)
+                email_tasks.append(
+                    email_finder.find_email(
+                        job_url=disc.url,
+                        company=disc.company,
+                        description_text=disc.description_text
                     )
                 )
-                continue
+
+        # Run email finding concurrently
+        email_results = await asyncio.gather(*email_tasks, return_exceptions=True)
+
+        for disc, email_result in zip(non_dup_jobs, email_results):
+            hr_email = email_result if isinstance(email_result, str) else None
+            email_status = "FOUND" if hr_email else "NOT_FOUND"
 
             # Process new job posting if auto_score_and_sync is enabled
             if request.auto_score_and_sync:
@@ -160,34 +197,33 @@ class JobDiscoveryService:
                         application_url=disc.url,
                         source=disc.source
                     )
-
                     new_processed_count += 1
-                    results.append(
-                        DiscoveredJobResult(
-                            discovered_job=disc,
-                            match_score=score_breakdown.total_score,
-                            decision_status=app_record.status.value,
-                            recommended_resume=score_breakdown.recommended_resume_filename,
-                            already_tracked=False
-                        )
-                    )
+                    results.append(DiscoveredJobResult(
+                        discovered_job=disc,
+                        match_score=score_breakdown.total_score,
+                        decision_status=app_record.status.value,
+                        recommended_resume=score_breakdown.recommended_resume_filename,
+                        already_tracked=False,
+                        hr_email=hr_email,
+                        email_status=email_status
+                    ))
                 except Exception as e:
                     logger.error(f"Error processing discovered job '{disc.title}': {e}")
-                    results.append(
-                        DiscoveredJobResult(
-                            discovered_job=disc,
-                            already_tracked=False,
-                            decision_status="ANALYSIS_ERROR"
-                        )
-                    )
-            else:
-                results.append(
-                    DiscoveredJobResult(
+                    results.append(DiscoveredJobResult(
                         discovered_job=disc,
                         already_tracked=False,
-                        decision_status="DISCOVERED"
-                    )
-                )
+                        decision_status="ANALYSIS_ERROR",
+                        hr_email=hr_email,
+                        email_status=email_status
+                    ))
+            else:
+                results.append(DiscoveredJobResult(
+                    discovered_job=disc,
+                    already_tracked=False,
+                    decision_status="DISCOVERED",
+                    hr_email=hr_email,
+                    email_status=email_status
+                ))
 
         return DiscoveryResponse(
             total_discovered=len(all_discovered),
