@@ -28,6 +28,13 @@ class AIClient:
         base_url = saved.get("base_url") or None
         temperature = saved.get("temperature", settings.OPENAI_TEMPERATURE)
 
+        if provider_enum == LLMProviderType.GEMINI:
+            base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+            if model and model.startswith("models/"):
+                model = model[7:]
+            if not model or model.lower() in ["gemini", "gemini-pro", "models/gemini", "mock", "none"] or "gpt-" in model.lower():
+                model = "gemini-1.5-flash"
+
         if not api_key and provider_enum not in [LLMProviderType.MOCK, LLMProviderType.OLLAMA]:
             provider_enum = LLMProviderType.MOCK
 
@@ -47,6 +54,15 @@ class AIClient:
         )
 
     def set_config(self, new_config: ProviderConfig) -> None:
+        if new_config.provider_type == LLMProviderType.GEMINI:
+            new_config.base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+            m = (new_config.model or "").strip()
+            if m.startswith("models/"):
+                m = m[7:]
+            if not m or m.lower() in ["gemini", "gemini-pro", "models/gemini", "mock", "none"] or "gpt-" in m.lower():
+                m = "gemini-1.5-flash"
+            new_config.model = m
+
         self.config = new_config
         ProviderFactory.set_active_config(new_config)
         config_store.set_ai_config({
