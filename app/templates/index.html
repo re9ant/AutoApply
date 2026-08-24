@@ -1125,8 +1125,8 @@
               <!-- Quick Model Selector Badges -->
               <div x-show="aiSettings.provider_type === 'gemini'" class="flex items-center space-x-2 mt-2">
                 <span class="text-[10px] text-slate-400 font-semibold">Recommended:</span>
+                <button type="button" @click="aiSettings.model = 'gemini-3.6-flash'" class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold" :class="aiSettings.model === 'gemini-3.6-flash' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'">gemini-3.6-flash</button>
                 <button type="button" @click="aiSettings.model = 'gemini-1.5-flash'" class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold" :class="aiSettings.model === 'gemini-1.5-flash' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'">gemini-1.5-flash</button>
-                <button type="button" @click="aiSettings.model = 'gemini-2.0-flash'" class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold" :class="aiSettings.model === 'gemini-2.0-flash' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'">gemini-2.0-flash</button>
                 <button type="button" @click="aiSettings.model = 'gemini-1.5-pro'" class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold" :class="aiSettings.model === 'gemini-1.5-pro' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'">gemini-1.5-pro</button>
               </div>
 
@@ -1946,7 +1946,7 @@ Qualifications:
         onProviderChange() {
           if (this.aiSettings.provider_type === 'gemini') {
             if (!this.aiSettings.model || this.aiSettings.model.startsWith('gpt-')) {
-              this.aiSettings.model = 'gemini-1.5-flash';
+              this.aiSettings.model = 'gemini-3.6-flash';
             }
           } else if (this.aiSettings.provider_type === 'openai') {
             if (!this.aiSettings.model || this.aiSettings.model.startsWith('gemini-')) {

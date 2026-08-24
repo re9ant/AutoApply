@@ -346,8 +346,8 @@ async def update_ai_settings(req: AIConfigUpdateRequest):
             base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
             if model and model.startswith("models/"):
                 model = model[7:]
-            if not model or model.lower() in ["gemini", "gemini-pro", "models/gemini", "mock", "none"] or "gpt-" in model.lower():
-                model = "gemini-1.5-flash"
+            if not model or model.lower() in ["gemini", "gemini-pro", "models/gemini", "gemini-2.0-flash", "mock", "none"] or "gpt-" in model.lower():
+                model = "gemini-3.6-flash"
 
         new_config = ProviderConfig(
             provider_type=req.provider_type,

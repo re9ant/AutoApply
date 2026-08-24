@@ -68,7 +68,7 @@ class OpenAICompatibleProvider(BaseLLMProvider):
             if clean_model.startswith("models/"):
                 clean_model = clean_model[7:]
             if not clean_model or clean_model.lower() in ["gemini", "gemini-pro", "models/gemini", "mock", "none"] or "gpt-" in clean_model.lower():
-                clean_model = "gemini-1.5-flash"
+                clean_model = "gemini-3.6-flash"
             self.config.model = clean_model
 
         api_key = self.config.api_key or "dummy-key-for-local"

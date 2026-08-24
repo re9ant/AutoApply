@@ -32,8 +32,8 @@ class AIClient:
             base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
             if model and model.startswith("models/"):
                 model = model[7:]
-            if not model or model.lower() in ["gemini", "gemini-pro", "models/gemini", "mock", "none"] or "gpt-" in model.lower():
-                model = "gemini-1.5-flash"
+            if not model or model.lower() in ["gemini", "gemini-pro", "models/gemini", "gemini-2.0-flash", "mock", "none"] or "gpt-" in model.lower():
+                model = "gemini-3.6-flash"
 
         if not api_key and provider_enum not in [LLMProviderType.MOCK, LLMProviderType.OLLAMA]:
             provider_enum = LLMProviderType.MOCK
@@ -59,8 +59,8 @@ class AIClient:
             m = (new_config.model or "").strip()
             if m.startswith("models/"):
                 m = m[7:]
-            if not m or m.lower() in ["gemini", "gemini-pro", "models/gemini", "mock", "none"] or "gpt-" in m.lower():
-                m = "gemini-1.5-flash"
+            if not m or m.lower() in ["gemini", "gemini-pro", "models/gemini", "gemini-2.0-flash", "mock", "none"] or "gpt-" in m.lower():
+                m = "gemini-3.6-flash"
             new_config.model = m
 
         self.config = new_config
