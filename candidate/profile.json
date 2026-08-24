@@ -2,216 +2,200 @@
   "candidate": {
     "name": "Sai Kowsik Ayyalasomayajula",
     "email": "saikowsikayyalasomayajula@gmail.com",
-    "phone": "+1 (555) 019-2834",
+    "phone": "+91-7989454329",
     "location": "Vizag, India",
-    "portfolio": "https://saikowsikayyalasomayajulaportfolio.weebly.com/",
+    "portfolio": "https://saikowsikayyalasomayajulaportfolio.weebly.com",
     "github": "https://github.com/re9ant",
-    "linkedin": "https://linkedin.com/in/alexmercer-dev",
-    "itch_io": "https://saikowsikayyalasomayajulaportfolio.weebly.com/projects.html",
-    "artstation": "https://artstation.com/alexmercer"
+    "linkedin": "https://linkedin.com/in/saikowsikayyalasomayajula",
+    "itch_io": "https://saikowsikayyalasomayajulaportfolio.weebly.com",
+    "artstation": null
   },
   "work_authorization": {
     "citizenship": [
-      "United States"
+      "India"
     ],
     "authorized_countries": [
-      "United States"
+      "India"
     ],
-    "requires_sponsorship": false,
+    "requires_sponsorship": true,
     "willing_to_relocate": true
   },
   "education": [
     {
-      "institution": "University of California, Berkeley",
-      "degree": "B.S.",
-      "field_of_study": "Computer Science & Engineering",
-      "start_year": 2020,
-      "graduation_year": 2024,
-      "gpa": "3.85 / 4.0",
+      "institution": "Raghu Engineering College",
+      "degree": "B.Tech",
+      "field_of_study": "Computer Science & Engineering (CyberSecurity)",
+      "start_year": 2021,
+      "graduation_year": 2025,
+      "gpa": null,
       "relevant_coursework": [
+        "Object-Oriented Programming (Java / C#)",
         "Data Structures & Algorithms",
-        "Computer Graphics & Shaders",
-        "Operating Systems & Systems Programming",
-        "Database Systems & Distributed Architectures",
-        "Game Engine Architecture & AI",
-        "Full-Stack Web Engineering"
+        "Cyber Security",
+        "API Design & Web Engineering",
+        "Software Development Life Cycle (SDLC)"
       ]
     }
   ],
   "skills": {
     "domains": [
       "Game Development",
-      "Backend Engineering",
-      "Full-Stack Development",
-      "Systems Programming"
+      "UI & Tools Programming",
+      "Unity Development",
+      "Software Engineering"
     ],
     "languages": [
       "C#",
-      "C++",
+      "Java",
       "Python",
-      "JavaScript",
       "SQL",
-      "HTML5 / CSS3"
+      "HTML5 / CSS3 / USS / UXML"
     ],
     "engines": [
-      "Unity (2021/2022/6)",
-      "Unreal Engine 5",
-      "Godot"
+      "Unity Engine",
+      "Unreal Engine"
     ],
     "frameworks": [
-      "Unity DOTS / Entities",
-      "Netcode for GameObjects"
+      "UI Toolkit (UXML/USS)",
+      "Yarn Spinner",
+      "Flask"
     ],
     "tools": [
       "Git & GitHub",
-      "Docker",
-      "MySQL",
-      "Visual Studio",
-      "JetBrains Rider",
-      "Blender",
-      "Postman"
+      "Unity Engine",
+      "Unreal Engine",
+      "Postman",
+      "Bitbucket",
+      "Jira",
+      "Confluence",
+      "Bitrix24",
+      "MySQL"
     ],
     "game_systems": [
-      "Gameplay Mechanics & Character Controllers",
-      "AI & Behavior Trees / Utility AI",
-      "State Machines (Hierarchical FSM)",
-      "NavMesh & Custom A* Pathfinding",
-      "Inventory & Quest Systems",
-      "UI Toolkit & uGUI",
-      "Custom Unity Editor Tools & Inspectors",
-      "Physics & Collision Systems",
-      "ScriptableObject Architectures",
-      "Object Pooling & Optimization"
+      "Gameplay & UI Toolkit Interaction Systems",
+      "AI & Event-Driven Interaction Logic",
+      "Custom Unity Editor Tools & Workflow Automation",
+      "Yarn Spinner Narrative Systems",
+      "Agile / Scrum Master Facilitation",
+      "Performance Optimization & Debugging"
     ]
   },
   "experience": [
     {
-      "company": "PixelForge Interactive",
-      "role": "Software & Gameplay Programmer",
-      "location": "San Francisco, CA",
+      "company": "Immersive Arts Studio",
+      "role": "UI / Tools Programmer",
+      "location": "Remote / Hybrid",
       "employment_type": "Full-time",
-      "start_date": "2024-06",
-      "end_date": "Present",
-      "is_current": true,
-      "description": "Engineered core gameplay systems and backend telemetry microservices for a 3D action title.",
+      "start_date": "2026-01",
+      "end_date": "2026-06",
+      "is_current": false,
+      "description": "Developed interaction systems and internal editor tools in Unity C# using UI Toolkit.",
       "achievements": [
-        "Architected responsive 3rd-person character controller and combat state machine in Unity C#.",
-        "Engineered low-latency Python FastAPI telemetry service capturing player telemetry and crash metrics into PostgreSQL.",
-        "Built modular custom Unity Editor tools reducing designer iteration times by 40%."
+        "Developed interaction systems in Unity using C# integrating features and functionality through callbacks.",
+        "Participated in Agile processes (daily stand-ups, sprint planning) and served as Scrum Master facilitating team coordination.",
+        "Implemented UI Toolkit solutions using UXML and USS, connecting UI components to backend systems and onboarding team members.",
+        "Designed and implemented internal tools to improve team productivity and development workflows.",
+        "Debugged and optimized application performance, improving responsiveness and user experience."
       ],
       "technologies": [
         "Unity",
         "C#",
-        "Python",
-        "FastAPI",
-        "PostgreSQL",
-        "Docker",
-        "Git"
-      ]
-    },
-    {
-      "company": "Apex Cloud Systems",
-      "role": "Software Engineering Intern",
-      "location": "San Francisco, CA",
-      "employment_type": "Internship",
-      "start_date": "2023-05",
-      "end_date": "2023-08",
-      "is_current": false,
-      "description": "Developed RESTful APIs and modern React dashboards for internal monitoring.",
-      "achievements": [
-        "Built full-stack analytics dashboard using React, TypeScript, and FastAPI with Redis caching.",
-        "Created automated Docker CI/CD test workflows on GitHub Actions reducing deployment failures by 25%."
-      ],
-      "technologies": [
-        "TypeScript",
-        "React",
-        "Python",
-        "FastAPI",
-        "Redis",
-        "Docker"
+        "UI Toolkit",
+        "UXML",
+        "USS",
+        "Agile / Jira"
       ]
     }
   ],
   "projects": [
     {
-      "name": "Chronicles of Aetheria",
+      "name": "The Union Against Tuberculosis",
       "domain": "Game Development",
-      "role": "Lead Gameplay & AI Developer",
+      "role": "Unity Developer & Tool Creator",
       "engine": "Unity",
-      "description": "3D Action RPG featuring fluid melee combat, enemy AI behavior trees, and procedural generation.",
+      "description": "Interactive real-world application in Unity C# featuring event-driven logic and narrative systems.",
       "technical_highlights": [
-        "Custom combat state machine with combo chains, parry windows, and hit-stop visual effects.",
-        "Boss enemy AI with multi-phase behavior trees and telegraphed attacks.",
-        "Custom HLSL shaders for dissolution and rim lighting in Universal Render Pipeline."
+        "Built interactive systems and user interaction features using C# and event-driven logic.",
+        "Integrated Yarn Spinner framework for narrative progression of the application.",
+        "Developed custom internal tools to streamline workflows and reduce manual effort.",
+        "Collaborated in a team of 4 under defined Agile sprint cycles with focus on usability and performance."
       ],
       "technologies": [
         "Unity",
         "C#",
-        "HLSL",
-        "URP",
-        "NavMesh"
+        "Yarn Spinner",
+        "Agile"
       ],
-      "repo_url": "https://github.com/alexmercer-dev/chronicles-of-aetheria",
-      "demo_url": "https://alexmercer.itch.io/chronicles-of-aetheria"
+      "repo_url": "https://saikowsikayyalasomayajulaportfolio.weebly.com",
+      "demo_url": "https://saikowsikayyalasomayajulaportfolio.weebly.com"
     },
     {
-      "name": "CloudTelemetry & Metrics Hub",
-      "domain": "Backend Engineering",
-      "role": "Solo Creator",
-      "engine": "FastAPI / Docker",
-      "description": "High-throughput telemetry ingestion pipeline for multiplayer games and microservices.",
+      "name": "Secure Image Steganography",
+      "domain": "Software Engineering & Security",
+      "role": "Lead Developer",
+      "engine": "Flask / Python",
+      "description": "Academic project building a secure steganography system to embed encrypted messages in images.",
       "technical_highlights": [
-        "Asynchronous event ingestion handling 1,500+ requests/sec using FastAPI and aiosqlite/PostgreSQL.",
-        "Real-time event streaming and dashboarding with WebSockets and React frontend."
+        "Implemented Elliptic Curve Cryptography (ECC) for encryption and secure key exchange.",
+        "Developed Flask-based web interface for encoding and decoding workflows.",
+        "Applied data compression and LSB-based image processing for invisible data hiding and retrieval."
       ],
       "technologies": [
         "Python",
-        "FastAPI",
-        "PostgreSQL",
-        "Redis",
-        "Docker",
-        "TypeScript"
+        "Flask",
+        "Cryptography (ECC)",
+        "LSB Image Processing"
       ],
-      "repo_url": "https://github.com/alexmercer-dev/cloud-telemetry-hub",
+      "repo_url": "https://github.com/re9ant",
       "demo_url": null
     }
   ],
   "achievements": [
     {
-      "title": "1st Place Winner - Global Game Jam 2024",
-      "issuer": "Global Game Jam",
-      "date": "2024-01",
-      "description": "Led team of 4 to program a physics puzzle game in Unity within 48 hours."
+      "title": "Selected for Microsoft Xbox Game Camp Asia",
+      "issuer": "Microsoft / Xbox",
+      "date": "2024",
+      "description": "Selected among Top Teams in Asia for Xbox Game Camp."
     },
     {
-      "title": "AWS Certified Cloud Practitioner",
-      "issuer": "Amazon Web Services",
-      "date": "2023-10",
-      "description": "Foundational certification in AWS cloud architectures, compute, and security."
+      "title": "2nd Place - IITK and IGDC Game Jam",
+      "issuer": "IIT Kanpur & IGDC",
+      "date": "2024",
+      "description": "Secured 2nd place in a 48-hour competitive game development challenge."
+    },
+    {
+      "title": "Programming in Java Certified",
+      "issuer": "IIT Kharagpur (NPTEL)",
+      "date": "2023",
+      "description": "Certified in Java Programming by IIT Kharagpur."
+    },
+    {
+      "title": "CyberSecurity Certification",
+      "issuer": "SkillDzire",
+      "date": "2023",
+      "description": "Specialized certification in CyberSecurity fundamentals."
     }
   ],
   "preferences": {
     "roles": [
-      "Gameplay Programmer",
+      "UI Programmer",
+      "Tools Programmer",
       "Unity Developer",
-      "Backend Engineer",
-      "Software Engineer",
-      "Full Stack Developer",
-      "Junior Game Developer",
-      "Python Developer"
+      "Gameplay Programmer",
+      "Game Systems Programmer",
+      "Software Engineer"
     ],
     "locations": [
-      "San Francisco, CA",
+      "Vizag, India",
       "Remote",
-      "Seattle, WA",
-      "Austin, TX",
-      "New York, NY"
+      "India",
+      "Global"
     ],
     "remote_only": false,
     "allow_hybrid": true,
     "allow_onsite": true,
     "minimum_match_score": 75,
-    "salary_currency": "USD",
-    "minimum_salary": 75000
+    "salary_currency": "INR",
+    "minimum_salary": 600000
   }
 }

@@ -1,26 +1,29 @@
 [
   {
     "filename": "SaiKowsikAyyalasomayajulaResume.pdf",
-    "title": "Sai Kowsik Ayyalasomayajula - Game Developer Resume",
-    "domain": "Game Development",
+    "title": "Sai Kowsik Ayyalasomayajula - Primary Resume",
+    "domain": "Game Development & Software Engineering",
     "primary_engine": "Unity",
     "focus_areas": [
-      "gameplay",
-      "mechanics",
-      "combat",
-      "character controller",
-      "ai",
-      "behavior trees",
-      "navmesh",
+      "ui toolkit",
+      "uxml",
+      "uss",
+      "tools programmer",
+      "unity",
       "c#",
-      "scriptableobjects"
+      "java",
+      "agile",
+      "scrum master",
+      "yarn spinner",
+      "steganography",
+      "flask"
     ],
     "target_roles": [
-      "Gameplay Programmer",
+      "UI Programmer",
+      "Tools Programmer",
       "Unity Developer",
-      "Game Programmer",
-      "Unity Gameplay Engineer",
-      "Game Systems Programmer"
+      "Gameplay Programmer",
+      "Software Engineer"
     ],
     "priority_score": 10
   },
