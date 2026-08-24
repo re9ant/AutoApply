@@ -1109,7 +1109,7 @@
           <div class="space-y-4">
             <div>
               <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">AI Provider</label>
-              <select x-model="aiSettings.provider_type" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+              <select x-model="aiSettings.provider_type" @change="onProviderChange()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
                 <option value="openai">OpenAI (GPT-4o, GPT-4o-mini)</option>
                 <option value="gemini">Google Gemini (Gemini 1.5 Flash / Pro)</option>
                 <option value="ollama">Ollama (Local LLM: Llama 3, Mistral, DeepSeek)</option>
@@ -1929,10 +1929,23 @@ Qualifications:
           }
         },
 
+        onProviderChange() {
+          if (this.aiSettings.provider_type === 'gemini') {
+            if (!this.aiSettings.model || this.aiSettings.model.startsWith('gpt-')) {
+              this.aiSettings.model = 'gemini-1.5-flash';
+            }
+          } else if (this.aiSettings.provider_type === 'openai') {
+            if (!this.aiSettings.model || this.aiSettings.model.startsWith('gemini-')) {
+              this.aiSettings.model = 'gpt-4o-mini';
+            }
+          }
+        },
+
         async testAiConnection() {
           this.testingConnection = true;
           this.testResult = null;
           try {
+            await this.saveAiSettings();
             const res = await fetch('/api/settings/ai/test', { method: 'POST' });
             this.testResult = await res.json();
           } catch (e) {

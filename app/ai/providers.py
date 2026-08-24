@@ -62,8 +62,11 @@ class OpenAICompatibleProvider(BaseLLMProvider):
         base_url = self.config.base_url
         if self.config.provider_type == LLMProviderType.OLLAMA and not base_url:
             base_url = "http://localhost:11434/v1"
-        elif self.config.provider_type == LLMProviderType.GEMINI and not base_url:
-            base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+        elif self.config.provider_type == LLMProviderType.GEMINI:
+            if not base_url or "generativelanguage" not in base_url:
+                base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+            if not self.config.model or "gpt-" in self.config.model.lower():
+                self.config.model = "gemini-1.5-flash"
 
         api_key = self.config.api_key or "dummy-key-for-local"
         if self.config.provider_type in [LLMProviderType.OPENAI, LLMProviderType.GEMINI] and not self.config.api_key:

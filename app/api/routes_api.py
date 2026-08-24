@@ -339,11 +339,20 @@ async def get_ai_settings():
 @router.post("/settings/ai")
 async def update_ai_settings(req: AIConfigUpdateRequest):
     try:
+        model = req.model
+        base_url = req.base_url if req.base_url else None
+
+        if req.provider_type == LLMProviderType.GEMINI:
+            if not base_url or "generativelanguage" not in base_url:
+                base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+            if not model or "gpt-" in model.lower():
+                model = "gemini-1.5-flash"
+
         new_config = ProviderConfig(
             provider_type=req.provider_type,
             api_key=req.api_key if req.api_key else ai_client.config.api_key,
-            model=req.model,
-            base_url=req.base_url if req.base_url else None,
+            model=model,
+            base_url=base_url,
             temperature=req.temperature
         )
         ai_client.set_config(new_config)
