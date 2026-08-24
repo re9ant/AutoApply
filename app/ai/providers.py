@@ -65,8 +65,12 @@ class OpenAICompatibleProvider(BaseLLMProvider):
         elif self.config.provider_type == LLMProviderType.GEMINI:
             if not base_url or "generativelanguage" not in base_url:
                 base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
-            if not self.config.model or "gpt-" in self.config.model.lower():
-                self.config.model = "gemini-1.5-flash"
+            clean_model = (self.config.model or "").strip()
+            if clean_model.startswith("models/"):
+                clean_model = clean_model[7:]
+            if not clean_model or "gpt-" in clean_model.lower():
+                clean_model = "gemini-1.5-flash"
+            self.config.model = clean_model
 
         api_key = self.config.api_key or "dummy-key-for-local"
         if self.config.provider_type in [LLMProviderType.OPENAI, LLMProviderType.GEMINI] and not self.config.api_key:
