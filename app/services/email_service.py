@@ -109,8 +109,11 @@ class EmailService:
             job_url=jd.application_url
         )
 
+        from app.scrapers.rss_scraper import RSSFeedScraper
+        clean_role = RSSFeedScraper.clean_role_title(jd.title, jd.company)
+
         candidate_name = profile.candidate.name
-        subject = f"Application: {jd.title} - {candidate_name}"
+        subject = f"Application for {clean_role} - {candidate_name}"
 
         # Identify key project to highlight
         top_project = profile.projects[0] if profile.projects else None
@@ -127,7 +130,7 @@ class EmailService:
 
         body = f"""Dear Hiring Team at {jd.company},
 
-I am writing to express my strong interest in the {jd.title} position at {jd.company}.
+I am writing to express my strong interest in the {clean_role} position at {jd.company}.
 
 {strengths_summary}
 

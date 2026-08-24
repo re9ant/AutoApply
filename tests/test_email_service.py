@@ -50,7 +50,7 @@ def test_application_email_generation():
         is_dry_run=True
     )
 
-    assert "Application: Unity Gameplay Programmer" in generated.subject
+    assert "Application for Unity Gameplay Programmer" in generated.subject
     assert profile.candidate.name in generated.subject
     assert profile.candidate.name in generated.body_text
     assert "Phoenix Labs" in generated.body_text

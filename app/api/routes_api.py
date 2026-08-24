@@ -476,17 +476,20 @@ async def generate_drafts(req: GenerateDraftsRequest):
         from app.models.job import ExtractedJobDescription, MatchScoreBreakdown
         from app.services.resume_selector import resume_selector
 
+        from app.scrapers.rss_scraper import RSSFeedScraper
+
         profile = profile_loader.load_profile()
         drafts = []
         for item in req.items:
             try:
+                clean_title = RSSFeedScraper.clean_role_title(item.job_title, item.company)
                 # Build a minimal JD object for email generation
                 jd = ExtractedJobDescription(
-                    title=item.job_title,
+                    title=clean_title,
                     company=item.company,
                     location=item.location or "Remote",
                     application_url=item.job_url or "",
-                    raw_source=item.notes or f"{item.job_title} at {item.company}"
+                    raw_source=item.notes or f"{clean_title} at {item.company}"
                 )
                 resume_fn = item.resume_used
                 if not resume_fn:
@@ -497,7 +500,7 @@ async def generate_drafts(req: GenerateDraftsRequest):
                 score = MatchScoreBreakdown(
                     total_score=75,
                     key_strengths=["Relevant experience", "Technical match"],
-                    match_summary=f"Strong fit for {item.job_title} at {item.company}",
+                    match_summary=f"Strong fit for {clean_title} at {item.company}",
                     recommended_action="AUTO_APPLY",
                     recommended_resume_filename=resume_fn
                 )

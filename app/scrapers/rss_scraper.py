@@ -136,24 +136,84 @@ class RSSFeedScraper(BaseJobScraper):
         return jobs
 
     def _extract_title_company(self, raw: str) -> tuple:
-        """Extract job title and company from common RSS title formats."""
-        raw = raw.strip()
+        """Extract clean job title and company from common RSS title formats."""
+        if not raw:
+            return "Software / Game Developer", "Unknown Studio"
+
+        raw_clean = html.unescape(raw).strip()
+        raw_clean = re.sub(r"<[^>]+>", " ", raw_clean)
+        raw_clean = re.sub(r"\s+", " ", raw_clean).strip()
+
+        title = raw_clean
+        company = "Unknown Studio"
+
         # "Role at Company" pattern
-        if " at " in raw:
-            parts = raw.split(" at ", 1)
-            return parts[0].strip(), parts[1].strip()
-        # "Company - Role" or "Company — Role" pattern
-        for sep in [" — ", " – ", " | "]:
-            if sep in raw:
-                parts = raw.split(sep, 1)
-                return parts[1].strip(), parts[0].strip()
-        if " - " in raw:
-            parts = raw.split(" - ", 1)
-            # Heuristic: shorter part is usually company
-            if len(parts[0]) < len(parts[1]):
-                return parts[1].strip(), parts[0].strip()
-            return parts[0].strip(), parts[1].strip()
-        return raw, "Unknown Studio"
+        if " at " in raw_clean:
+            parts = raw_clean.split(" at ", 1)
+            title = parts[0].strip()
+            company = parts[1].strip()
+        else:
+            # "Company - Role" or "Company — Role" pattern
+            for sep in [" — ", " – ", " | ", " - ", " : "]:
+                if sep in raw_clean:
+                    parts = raw_clean.split(sep, 1)
+                    p0, p1 = parts[0].strip(), parts[1].strip()
+                    # Determine which part is role vs company
+                    role_kws = ["programmer", "engineer", "developer", "artist", "designer", "producer", "manager", "specialist", "lead", "senior", "junior", "intern", "architect"]
+                    p0_has_kw = any(kw in p0.lower() for kw in role_kws)
+                    p1_has_kw = any(kw in p1.lower() for kw in role_kws)
+
+                    if p1_has_kw and not p0_has_kw:
+                        title, company = p1, p0
+                    elif p0_has_kw and not p1_has_kw:
+                        title, company = p0, p1
+                    elif len(p0) < len(p1):
+                        title, company = p1, p0
+                    else:
+                        title, company = p0, p1
+                    break
+
+        title = self.clean_role_title(title, company)
+        company = company[:50].strip() or "Unknown Studio"
+        return title, company
+
+    @staticmethod
+    def clean_role_title(raw_title: str, company: str = "") -> str:
+        """Isolate the clean role title and strip out boilerplate company descriptions."""
+        if not raw_title:
+            return "Software / Game Developer"
+
+        text = html.unescape(raw_title).strip()
+        text = re.sub(r"<[^>]+>", " ", text)
+        text = re.sub(r"\s+", " ", text).strip()
+
+        # Split by common title separators
+        parts = re.split(r"\s+(?:—|–|-|\||@|at|:)\s+", text)
+        role_kws = ["programmer", "engineer", "developer", "artist", "designer", "producer", "manager", "specialist", "lead", "senior", "junior", "intern", "architect", "analyst", "tech"]
+
+        # 1. Search for part containing a role keyword and under 60 chars
+        for p in parts:
+            p_clean = p.strip()
+            if any(kw in p_clean.lower() for kw in role_kws) and 3 <= len(p_clean) <= 60:
+                return p_clean
+
+        # 2. Search for role keyword phrase within long paragraph
+        match = re.search(
+            r"\b(?:senior|junior|lead|principal|staff)?\s*(?:gameplay|unity|unreal|ui|tools|backend|fullstack|software|game|graphics|audio|systems)?\s*(?:programmer|engineer|developer|artist|designer|producer)\b",
+            text, re.IGNORECASE
+        )
+        if match:
+            return match.group(0).title()
+
+        # 3. Fallback: non-company part under 60 chars
+        valid_parts = [p.strip() for p in parts if p.strip() and p.strip().lower() != company.lower() and len(p.strip()) <= 60]
+        if valid_parts:
+            return valid_parts[0]
+
+        # 4. Ultimate fallback: truncate cleanly
+        if len(text) > 50:
+            return text[:47].rstrip() + "..."
+        return text
 
     def _matches_filters(self, title: str, text: str, filters: ScrapeFilter) -> bool:
         if not filters.keywords:
