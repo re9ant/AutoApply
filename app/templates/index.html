@@ -1310,6 +1310,8 @@
 
         async initApp() {
           await this.loadPresets();
+          await this.loadDiscoverySettings();
+          await this.loadApplyPreferences();
           await this.loadAiSettings();
           await this.loadEmailSettings();
           await this.loadResumes();
@@ -1539,6 +1541,62 @@
           }
         },
 
+        async loadDiscoverySettings() {
+          try {
+            const res = await fetch('/api/settings/discovery');
+            const data = await res.json();
+            if (data.selected_presets) this.discoveryForm.selected_presets = data.selected_presets;
+            if (data.keywords_text) this.discoveryForm.keywords_text = data.keywords_text;
+            if (data.rss_urls) this.discoveryForm.rss_urls = data.rss_urls;
+            if (data.remote_only !== undefined) this.discoveryForm.remote_only = data.remote_only;
+            if (data.auto_score_and_sync !== undefined) this.discoveryForm.auto_score_and_sync = data.auto_score_and_sync;
+          } catch (e) {
+            console.error('Error loading discovery settings:', e);
+          }
+        },
+
+        async saveDiscoverySettings() {
+          try {
+            await fetch('/api/settings/discovery', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                selected_presets: this.discoveryForm.selected_presets,
+                keywords_text: this.discoveryForm.keywords_text,
+                rss_urls: this.discoveryForm.rss_urls,
+                remote_only: this.discoveryForm.remote_only,
+                auto_score_and_sync: this.discoveryForm.auto_score_and_sync,
+                max_jobs_per_source: this.discoveryForm.max_jobs_per_source
+              })
+            });
+          } catch (e) {
+            console.error('Error saving discovery settings:', e);
+          }
+        },
+
+        async loadApplyPreferences() {
+          try {
+            const res = await fetch('/api/settings/preferences');
+            const data = await res.json();
+            if (data.prefer_email !== undefined) this.applyPreferences.prefer_email = data.prefer_email;
+            if (data.is_dry_run !== undefined) this.applyPreferences.is_dry_run = data.is_dry_run;
+          } catch (e) {
+            console.error('Error loading apply preferences:', e);
+          }
+        },
+
+        async saveApplyPreferences() {
+          try {
+            await fetch('/api/settings/preferences', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.applyPreferences)
+            });
+          } catch (e) {
+            console.error('Error saving apply preferences:', e);
+          }
+        },
+
         addRssUrl() {
           const url = this.newRssUrl.trim();
           if (!url) return;
@@ -1679,6 +1737,7 @@
           this.discoveryResponse = null;
           this.discoveryAbortController = new AbortController();
           try {
+            await this.saveDiscoverySettings();
             const parseList = (txt) => (txt || '').split(',').map(s => s.trim()).filter(Boolean);
             const parsedKeywords = parseList(this.discoveryForm.keywords_text);
             const payload = {

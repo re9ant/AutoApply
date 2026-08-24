@@ -26,99 +26,82 @@
   },
   {
     "filename": "unity_gameplay.pdf",
-    "title": "Unity Gameplay Programmer Resume",
+    "title": "Unity Gameplay & Mechanics Specialist",
     "domain": "Game Development",
     "primary_engine": "Unity",
     "focus_areas": [
       "gameplay",
       "mechanics",
-      "character controller",
       "combat",
-      "ai",
-      "behavior trees",
-      "c#",
-      "scriptableobjects",
-      "physics"
+      "physics",
+      "animation"
     ],
     "target_roles": [
       "Gameplay Programmer",
-      "Unity Developer",
-      "Game Programmer",
-      "Unity Gameplay Engineer",
-      "Game Systems Programmer"
+      "Unity Engineer",
+      "Combat Programmer"
     ],
     "priority_score": 9
   },
   {
     "filename": "unity_tools.pdf",
-    "title": "Unity Tools & UI Programmer Resume",
+    "title": "Unity Tools & Pipeline Engineer",
     "domain": "Game Development",
     "primary_engine": "Unity",
     "focus_areas": [
       "tools",
       "editor scripting",
       "ui toolkit",
-      "ugui",
       "pipeline",
-      "graphview",
-      "c#",
-      "custom inspectors"
+      "ugui"
     ],
     "target_roles": [
-      "Unity Tools Programmer",
-      "Tools Engineer",
-      "UI Programmer",
-      "Technical Artist"
+      "Tools Programmer",
+      "Pipeline Engineer",
+      "Unity UI Developer"
     ],
-    "priority_score": 9
+    "priority_score": 8
   },
   {
     "filename": "backend_software_engineer.pdf",
-    "title": "Backend Software Engineer Resume",
-    "domain": "Backend Engineering",
+    "title": "Backend Software Engineer (Python / FastAPI)",
+    "domain": "Software Engineering",
     "primary_engine": "None",
     "focus_areas": [
-      "python",
+      "backend",
       "fastapi",
-      "django",
-      "rest api",
+      "python",
       "postgresql",
-      "redis",
-      "microservices",
       "docker",
-      "sql",
-      "c#"
+      "redis",
+      "api"
     ],
     "target_roles": [
       "Backend Engineer",
-      "Backend Developer",
-      "Python Developer",
       "Software Engineer",
-      "API Engineer"
+      "Python Developer",
+      "API Developer"
     ],
-    "priority_score": 10
+    "priority_score": 8
   },
   {
     "filename": "fullstack_developer.pdf",
-    "title": "Full Stack Developer Resume",
-    "domain": "Full-Stack Development",
+    "title": "Full Stack Developer (TypeScript / React)",
+    "domain": "Web & Tech",
     "primary_engine": "None",
     "focus_areas": [
+      "fullstack",
       "typescript",
       "react",
       "next.js",
-      "node.js",
-      "tailwind css",
-      "rest api",
-      "frontend",
-      "full stack"
+      "tailwind",
+      "node"
     ],
     "target_roles": [
       "Full Stack Developer",
-      "Full Stack Engineer",
-      "Frontend Developer",
-      "Web Developer"
+      "Frontend Engineer",
+      "Web Application Developer"
     ],
-    "priority_score": 10
+    "priority_score": 7
   }
 ]

@@ -399,6 +399,32 @@ async def test_email_settings():
     return email_service.test_smtp_connection()
 
 
+@router.get("/settings/discovery")
+async def get_discovery_settings():
+    from app.config.config_store import config_store
+    return config_store.get_discovery_config()
+
+
+@router.post("/settings/discovery")
+async def save_discovery_settings(data: Dict[str, Any]):
+    from app.config.config_store import config_store
+    config_store.set_discovery_config(data)
+    return {"success": True, "message": "Discovery settings persisted."}
+
+
+@router.get("/settings/preferences")
+async def get_apply_preferences():
+    from app.config.config_store import config_store
+    return config_store.get_apply_preferences()
+
+
+@router.post("/settings/preferences")
+async def save_apply_preferences(data: Dict[str, Any]):
+    from app.config.config_store import config_store
+    config_store.set_apply_preferences(data)
+    return {"success": True, "message": "Apply preferences persisted."}
+
+
 # --- 8. Email Draft Generation & Sending ---
 class DraftItem(BaseModel):
     company: str

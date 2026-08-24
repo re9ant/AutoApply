@@ -13,5 +13,20 @@
     "smtp_host": "smtp.gmail.com",
     "smtp_port": 587,
     "use_tls": true
+  },
+  "discovery": {
+    "selected_presets": [
+      "https://remotegamejobs.com/feed",
+      "https://weworkremotely.com/categories/remote-game-dev-jobs.rss"
+    ],
+    "keywords_text": "Unity, Gameplay, Game Programmer, Backend, Software Engineer, C#, Python",
+    "rss_urls": [],
+    "remote_only": false,
+    "auto_score_and_sync": true,
+    "max_jobs_per_source": 10
+  },
+  "apply_preferences": {
+    "prefer_email": true,
+    "is_dry_run": true
   }
 }

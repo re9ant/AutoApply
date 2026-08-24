@@ -27,10 +27,25 @@ class PersistentConfig(BaseModel):
         "smtp_port": 587,
         "use_tls": True
     })
+    discovery: Dict[str, Any] = Field(default_factory=lambda: {
+        "selected_presets": [
+            "https://remotegamejobs.com/feed",
+            "https://weworkremotely.com/categories/remote-game-dev-jobs.rss"
+        ],
+        "keywords_text": "Unity, Gameplay, Game Programmer, Backend, Software Engineer, C#, Python",
+        "rss_urls": [],
+        "remote_only": False,
+        "auto_score_and_sync": True,
+        "max_jobs_per_source": 10
+    })
+    apply_preferences: Dict[str, Any] = Field(default_factory=lambda: {
+        "prefer_email": True,
+        "is_dry_run": True
+    })
 
 
 class ConfigStore:
-    """Manages persistent JSON configuration for AI settings and Gmail settings."""
+    """Manages persistent JSON configuration for AI, Gmail, Discovery, and Preferences."""
 
     def __init__(self, file_path: Path = SETTINGS_FILE):
         self.file_path = file_path
@@ -46,6 +61,10 @@ class ConfigStore:
                 logger.error(f"Error reading {self.file_path}: {e}")
         return PersistentConfig()
 
+    def reload(self) -> PersistentConfig:
+        self._config = self._load()
+        return self._config
+
     def save(self) -> None:
         try:
             self.file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -56,17 +75,35 @@ class ConfigStore:
             logger.error(f"Failed to write configuration to {self.file_path}: {e}")
 
     def get_ai_config(self) -> Dict[str, Any]:
-        return self._config.ai
+        return self.reload().ai
 
     def set_ai_config(self, data: Dict[str, Any]) -> None:
+        self.reload()
         self._config.ai.update(data)
         self.save()
 
     def get_email_config(self) -> Dict[str, Any]:
-        return self._config.email
+        return self.reload().email
 
     def set_email_config(self, data: Dict[str, Any]) -> None:
+        self.reload()
         self._config.email.update(data)
+        self.save()
+
+    def get_discovery_config(self) -> Dict[str, Any]:
+        return self.reload().discovery
+
+    def set_discovery_config(self, data: Dict[str, Any]) -> None:
+        self.reload()
+        self._config.discovery.update(data)
+        self.save()
+
+    def get_apply_preferences(self) -> Dict[str, Any]:
+        return self.reload().apply_preferences
+
+    def set_apply_preferences(self, data: Dict[str, Any]) -> None:
+        self.reload()
+        self._config.apply_preferences.update(data)
         self.save()
 
 
