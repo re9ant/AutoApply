@@ -343,8 +343,7 @@ async def update_ai_settings(req: AIConfigUpdateRequest):
         base_url = req.base_url if req.base_url else None
 
         if req.provider_type == LLMProviderType.GEMINI:
-            if not base_url or "generativelanguage" not in base_url:
-                base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+            base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
             if model and model.startswith("models/"):
                 model = model[7:]
             if not model or "gpt-" in model.lower():

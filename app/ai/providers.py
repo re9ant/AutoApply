@@ -63,8 +63,7 @@ class OpenAICompatibleProvider(BaseLLMProvider):
         if self.config.provider_type == LLMProviderType.OLLAMA and not base_url:
             base_url = "http://localhost:11434/v1"
         elif self.config.provider_type == LLMProviderType.GEMINI:
-            if not base_url or "generativelanguage" not in base_url:
-                base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+            base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
             clean_model = (self.config.model or "").strip()
             if clean_model.startswith("models/"):
                 clean_model = clean_model[7:]
